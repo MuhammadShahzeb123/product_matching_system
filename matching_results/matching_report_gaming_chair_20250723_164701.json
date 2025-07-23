@@ -1,0 +1,162 @@
+{
+  "search_term": "gaming chair",
+  "timestamp": "20250723_164701",
+  "total_comparisons": 6,
+  "summary": {
+    "unique_amazon_products": 2,
+    "unique_target_products": 3,
+    "best_match_score": 105.0,
+    "best_match_confidence": "High"
+  },
+  "comparisons": [
+    {
+      "rank": 1,
+      "amazon_product": {
+        "title": "Home Office Chair Ergonomic Desk Chair Mesh Computer Chair with Lumbar Support Armrest Executive Rolling Swivel Adjustable Mid Back Task Chair for Women Adults, Black",
+        "asin": "B00FS3VJAO",
+        "brand": "BestOffice",
+        "price": "$37.88",
+        "url": "https://www.amazon.com/dp/B00FS3VJAO/"
+      },
+      "target_product": {
+        "title": "XIZZI Home Office Desk Chairs Computer Office Chair, Modern Ergonomic High Back Suede Fabric Office Chair for Executive or Home Office",
+        "tcin": "1001388404",
+        "brand": "XIZZI",
+        "price": "$159.00",
+        "url": "https://www.target.com/p/-/A-1001388404"
+      },
+      "match_score": 105.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 50,
+        "category_match": 20,
+        "product_compatibility": 35.0
+      }
+    },
+    {
+      "rank": 2,
+      "amazon_product": {
+        "title": "BestOffice High-Back Gaming Chair PC Office Chair Computer Racing Chair PU Desk Task Chair Ergonomic Executive Swivel Rolling Chair with Lumbar Support for Back Pain Women, Men,White",
+        "asin": "B07KJYY9BD",
+        "brand": "BestOffice",
+        "price": "$82.99",
+        "url": "https://www.amazon.com/dp/B07KJYY9BD/"
+      },
+      "target_product": {
+        "title": "XIZZI Home Office Desk Chairs Computer Office Chair, Modern Ergonomic High Back Suede Fabric Office Chair for Executive or Home Office",
+        "tcin": "1001388404",
+        "brand": "XIZZI",
+        "price": "$159.00",
+        "url": "https://www.target.com/p/-/A-1001388404"
+      },
+      "match_score": 105.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 50,
+        "category_match": 20,
+        "product_compatibility": 35.0
+      }
+    },
+    {
+      "rank": 3,
+      "amazon_product": {
+        "title": "Home Office Chair Ergonomic Desk Chair Mesh Computer Chair with Lumbar Support Armrest Executive Rolling Swivel Adjustable Mid Back Task Chair for Women Adults, Black",
+        "asin": "B00FS3VJAO",
+        "brand": "BestOffice",
+        "price": "$37.88",
+        "url": "https://www.amazon.com/dp/B00FS3VJAO/"
+      },
+      "target_product": {
+        "title": "Big Joe Video Lounger Bean Bag Chair for Gaming and Lounging, Polyester Nylon Blend, Kids",
+        "tcin": "92455154",
+        "brand": "Big Joe",
+        "price": "$46.99",
+        "url": "https://www.target.com/p/-/A-92455154"
+      },
+      "match_score": 100.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 15.0,
+        "price_match": 25,
+        "category_match": 20,
+        "feature_keywords": 5,
+        "product_compatibility": 35.0
+      }
+    },
+    {
+      "rank": 4,
+      "amazon_product": {
+        "title": "Home Office Chair Ergonomic Desk Chair Mesh Computer Chair with Lumbar Support Armrest Executive Rolling Swivel Adjustable Mid Back Task Chair for Women Adults, Black",
+        "asin": "B00FS3VJAO",
+        "brand": "BestOffice",
+        "price": "$37.88",
+        "url": "https://www.amazon.com/dp/B00FS3VJAO/"
+      },
+      "target_product": {
+        "title": "Swivel Dorm Gaming Chair Gray - Room Essentials&#8482;: Upholstered Computer Desk Chair, Adjustable, Fixed Arms",
+        "tcin": "89198190",
+        "brand": "Room Essentials",
+        "price": "$150.00",
+        "url": "https://www.target.com/p/-/A-89198190"
+      },
+      "match_score": 90.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 30,
+        "category_match": 20,
+        "feature_keywords": 5,
+        "product_compatibility": 35.0
+      }
+    },
+    {
+      "rank": 5,
+      "amazon_product": {
+        "title": "BestOffice High-Back Gaming Chair PC Office Chair Computer Racing Chair PU Desk Task Chair Ergonomic Executive Swivel Rolling Chair with Lumbar Support for Back Pain Women, Men,White",
+        "asin": "B07KJYY9BD",
+        "brand": "BestOffice",
+        "price": "$82.99",
+        "url": "https://www.amazon.com/dp/B07KJYY9BD/"
+      },
+      "target_product": {
+        "title": "Big Joe Video Lounger Bean Bag Chair for Gaming and Lounging, Polyester Nylon Blend, Kids",
+        "tcin": "92455154",
+        "brand": "Big Joe",
+        "price": "$46.99",
+        "url": "https://www.target.com/p/-/A-92455154"
+      },
+      "match_score": 90.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 30,
+        "category_match": 20,
+        "feature_keywords": 5,
+        "product_compatibility": 35.0
+      }
+    },
+    {
+      "rank": 6,
+      "amazon_product": {
+        "title": "BestOffice High-Back Gaming Chair PC Office Chair Computer Racing Chair PU Desk Task Chair Ergonomic Executive Swivel Rolling Chair with Lumbar Support for Back Pain Women, Men,White",
+        "asin": "B07KJYY9BD",
+        "brand": "BestOffice",
+        "price": "$82.99",
+        "url": "https://www.amazon.com/dp/B07KJYY9BD/"
+      },
+      "target_product": {
+        "title": "Swivel Dorm Gaming Chair Gray - Room Essentials&#8482;: Upholstered Computer Desk Chair, Adjustable, Fixed Arms",
+        "tcin": "89198190",
+        "brand": "Room Essentials",
+        "price": "$150.00",
+        "url": "https://www.target.com/p/-/A-89198190"
+      },
+      "match_score": 90.0,
+      "confidence": "High",
+      "score_breakdown": {
+        "title_similarity": 30,
+        "category_match": 20,
+        "feature_keywords": 5,
+        "product_compatibility": 35.0
+      }
+    }
+  ]
+}
