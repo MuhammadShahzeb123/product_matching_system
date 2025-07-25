@@ -1,0 +1,435 @@
+{
+  "basic_info": {
+    "tcin": "94781799",
+    "name": "RTIC Outdoors 8qt Road Trip Personal Cooler",
+    "brand": "RTIC Outdoors",
+    "brand_url": "/b/rtic-outdoors/-/N-q643len2o5d",
+    "model_number": "94781799",
+    "manufacturer": "RTIC Outdoors",
+    "upc": "840008267681",
+    "gtin": "840008267681",
+    "asin_equivalent": "94781799",
+    "total_specifications": 2,
+    "extraction_timestamp": "2025-07-26T00:46:56.826878"
+  },
+  "pricing": {
+    "formatted_current_price": "$59.99",
+    "price_type": "reg",
+    "location_id": 3991
+  },
+  "physical_attributes": {
+    "detailed_dimensions": {
+      "Dimensions (Overall)": "10.79 Inches (H) x 11.73 Inches (W) x 7.99 Inches (D)",
+      "Weight": "5.7 Pounds"
+    }
+  },
+  "product_details": {
+    "materials": [
+      "Liner Material: Polypropylene",
+      "Material: Polypropylene"
+    ],
+    "care_instructions": [
+      "Care & Cleaning: Wash With Soap and Water"
+    ],
+    "product_type": "SPORTING GOODS",
+    "product_type_id": 543,
+    "purchase_behavior": "Discretionary",
+    "import_designation": "Made in the USA or Imported"
+  },
+  "images": {
+    "base_url": "//target.scene7.com/is/image/Target/",
+    "primary_image": {
+      "url": "https://target.scene7.com/is/image/Target/GUEST_14c71ff4-0d3d-42da-8aa3-03ba9540531a",
+      "name": "GUEST_14c71ff4-0d3d-42da-8aa3-03ba9540531a"
+    },
+    "swatch_image": {
+      "url": "https://target.scene7.com/is/image/Target/GUEST_9ac1d330-7a2e-4041-b6dc-ae00d54fa5e8?cropN=0.45,0.45,0.1,0.1&sizeN=150,150",
+      "name": "GUEST_9ac1d330-7a2e-4041-b6dc-ae00d54fa5e8?cropN=0.45,0.45,0.1,0.1&sizeN=150,150"
+    },
+    "alternate_images": [
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_d7d8a7ed-0ea8-45ee-a7bf-ad13711478fb",
+        "name": "GUEST_d7d8a7ed-0ea8-45ee-a7bf-ad13711478fb"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_aec210af-48a5-4d33-b8d9-1a7b64210fa9",
+        "name": "GUEST_aec210af-48a5-4d33-b8d9-1a7b64210fa9"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_4e364013-a854-4e51-9d47-206978b6e536",
+        "name": "GUEST_4e364013-a854-4e51-9d47-206978b6e536"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_c23f06e1-75b8-4238-a1dd-411a6467d41b",
+        "name": "GUEST_c23f06e1-75b8-4238-a1dd-411a6467d41b"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_272870af-6994-480a-b66f-1fcbd3b3c19d",
+        "name": "GUEST_272870af-6994-480a-b66f-1fcbd3b3c19d"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_aa4b98f9-faae-458a-a8fe-aecf56472fd8",
+        "name": "GUEST_aa4b98f9-faae-458a-a8fe-aecf56472fd8"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_45bf9a81-73f2-447b-b18b-edc70a50ff58",
+        "name": "GUEST_45bf9a81-73f2-447b-b18b-edc70a50ff58"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_4728badb-77a0-44a4-a9ee-da091b8411e9",
+        "name": "GUEST_4728badb-77a0-44a4-a9ee-da091b8411e9"
+      }
+    ],
+    "content_labels": [
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_14c71ff4-0d3d-42da-8aa3-03ba9540531a"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_4728badb-77a0-44a4-a9ee-da091b8411e9"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_c23f06e1-75b8-4238-a1dd-411a6467d41b"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_aec210af-48a5-4d33-b8d9-1a7b64210fa9"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_d7d8a7ed-0ea8-45ee-a7bf-ad13711478fb"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_4e364013-a854-4e51-9d47-206978b6e536"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_aa4b98f9-faae-458a-a8fe-aecf56472fd8"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_272870af-6994-480a-b66f-1fcbd3b3c19d"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_45bf9a81-73f2-447b-b18b-edc70a50ff58"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_9ac1d330-7a2e-4041-b6dc-ae00d54fa5e8?cropN=0.45,0.45,0.1,0.1&sizeN=150,150"
+      }
+    ]
+  },
+  "vendor_info": {},
+  "category_info": {
+    "department_name": "OUTDOOR RECREATION",
+    "department_id": 337,
+    "class_id": 1,
+    "category_name": "Camping Gear",
+    "parent_category_id": "5xt85",
+    "breadcrumbs": [
+      {
+        "canonical_url": "/",
+        "category_id": "root",
+        "name": "target"
+      },
+      {
+        "canonical_url": "/c/sports-outdoors/-/N-5xt85",
+        "category_id": "5xt85",
+        "name": "Sports & Outdoors"
+      },
+      {
+        "canonical_url": "/c/camping-outdoors-sports/-/N-5xt6e",
+        "category_id": "5xt6e",
+        "name": "Camping Gear"
+      }
+    ]
+  },
+  "reviews": {
+    "average_rating": 4.26,
+    "total_reviews": 635,
+    "rating_distribution": {
+      "rating1": 51,
+      "rating2": 32,
+      "rating3": 55,
+      "rating4": 65,
+      "rating5": 432
+    },
+    "recommended_count": 2,
+    "not_recommended_count": 1,
+    "recommended_percentage": 66,
+    "question_count": 1,
+    "has_verified_reviews": true,
+    "recent_reviews": [
+      {
+        "id": "08fa574a-8665-4c03-98fd-1bcfcef0798f",
+        "text": "We bought this to replace our Rubbermaid to keep ice longer. It is no better than our Rubbermaid. Very disappointed due to the higher cost. Thank you, Chris Crandlemire",
+        "author": {
+          "nickname": "Chris C.",
+          "external_id": "7eda112a-e894-5dcf-989c-8188deadbc5c"
+        },
+        "title": "We bought this to replace",
+        "rating": {
+          "value": 1,
+          "submitted_at": "2025-07-21T13:51:56.000Z"
+        }
+      },
+      {
+        "id": "cfa0d44a-ebd7-411f-9336-0a212317439b",
+        "text": "Loved the cooler and the ability to personalize it. I would have loved to have the personalization color match the same green on the cooler, but I couldn’t find that so I had to go with black. Wish there was a redo….",
+        "author": {
+          "nickname": "CHERIE V.",
+          "external_id": "4bfd9570-e090-5e83-a5ba-46faa75a21a9"
+        },
+        "title": "Matched colors for personalizations",
+        "rating": {
+          "value": 4,
+          "submitted_at": "2025-07-21T02:06:21.000Z"
+        }
+      },
+      {
+        "id": "acafb4a4-9b9a-4694-9e09-1eddce9c0ae4",
+        "text": "Its a bit difficult to open, and even tho the measurements were listed it still seems too small. I was thinking a bottle could be stood upright but it has to be laid on its side. Makes it difficult to dig thro a could kinds.",
+        "author": {
+          "nickname": "Tina H.",
+          "external_id": "6b7f6a7a-4f3b-5270-bbca-62780eab49ad"
+        },
+        "title": "Its a bit difficult to",
+        "rating": {
+          "value": 3,
+          "submitted_at": "2025-07-20T01:02:28.000Z"
+        }
+      },
+      {
+        "id": "dae36c31-03de-4c6e-a1b2-ea5d655dd644",
+        "text": "Does not hold ice for very long and that’s even inside house with air conditioning. . Very disappointing for the price you pay.",
+        "author": {
+          "nickname": "Bill O.",
+          "external_id": "00af3298-9a97-553c-bb32-f92bf8fc624c"
+        },
+        "title": "worst cooler",
+        "rating": {
+          "value": 1,
+          "submitted_at": "2025-07-19T00:15:09.000Z"
+        }
+      },
+      {
+        "id": "e2124e34-61a2-4ec2-9806-de5f263e1930",
+        "text": "I liked it so much, I bought the 16 quart model as well. Very disappointed with the number of marketing emails and the difficulty of unsubscribing.",
+        "author": {
+          "nickname": "Mark R.",
+          "external_id": "b9bb0c0a-61bf-5a1b-a6a6-32dfdaf3901d"
+        },
+        "title": "I liked it so much,",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-18T14:37:18.000Z"
+        }
+      },
+      {
+        "id": "92e7c117-1125-47f2-b239-703459d4e58e",
+        "text": "Perfect size for a quick day trip or to the beach!",
+        "author": {
+          "nickname": "Trish S.",
+          "external_id": "b3247eef-5ab0-55f1-b40f-57794995e8ec"
+        },
+        "title": "Little cooler",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-18T12:22:05.000Z"
+        }
+      },
+      {
+        "id": "4497a3a5-42fa-4963-992e-b745642ef1bb",
+        "text": "Almost perfect for taking lunch, it does not fit all my meal prep containers but that is on me. It is lightweight and that was also a necessity. Cute color and glad that I got the matching tumbler. I would say my ice packs stay frozen for about 10 hours.",
+        "author": {
+          "nickname": "michelle a.",
+          "external_id": "f0734a4b-424c-5ba5-8fdc-da7e5e983fa3"
+        },
+        "title": "Good cooler",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-18T12:05:12.000Z"
+        }
+      },
+      {
+        "id": "a265cac1-649f-49ae-b0ca-c096dd1ec230",
+        "text": "Just perfect for the car. Not to big and fits right in the middle of back floorboard.",
+        "author": {
+          "nickname": "Christina H.",
+          "external_id": "d175ee2c-cfbe-573d-9d90-89b2a9aef514"
+        },
+        "title": "Just perfect for the car.",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-16T19:04:12.000Z"
+        }
+      }
+    ],
+    "review_photos": [
+      "https://target.scene7.com/is/image/Target/GUEST_e51fdd0e-d012-4c53-a0c9-41dad1c977ac",
+      "https://target.scene7.com/is/image/Target/GUEST_b35acc0b-4ba8-49c0-bbaa-73e82241df3c",
+      "https://target.scene7.com/is/image/Target/GUEST_d45ef712-a4e9-4f74-b46f-a54280f87dcc",
+      "https://target.scene7.com/is/image/Target/GUEST_1568db5a-3fa9-45ef-8043-e853c838a319",
+      "https://target.scene7.com/is/image/Target/GUEST_fa828218-dbe7-4771-8f66-3417e6c51cba",
+      "https://target.scene7.com/is/image/Target/GUEST_c5504400-44b2-4398-9f81-1ad45d39cfe1",
+      "https://target.scene7.com/is/image/Target/GUEST_7a426cf8-59ea-4a54-8221-c30592750cff",
+      "https://target.scene7.com/is/image/Target/GUEST_8d33a7a7-1aa0-473c-a240-264416bf4896",
+      "https://target.scene7.com/is/image/Target/GUEST_f2d08ece-9d9e-4352-81a9-94f73f8a0f7c",
+      "https://target.scene7.com/is/image/Target/GUEST_a4660823-4992-4c4f-ad6a-9415eea3d124",
+      "https://target.scene7.com/is/image/Target/GUEST_56f177e4-9a83-4958-8122-ab53f6ac14ab",
+      "https://target.scene7.com/is/image/Target/GUEST_c4ca2279-6d30-4148-98cb-2ff24c11094d"
+    ]
+  },
+  "fulfillment": {
+    "return_policies": [
+      {
+        "user_type": "regular_guest",
+        "day_count": 90
+      },
+      {
+        "user_type": "best_guest",
+        "day_count": 120
+      }
+    ]
+  },
+  "variations": {
+    "child_products": [
+      {
+        "tcin": "92281864",
+        "primary_barcode": "840008267681",
+        "price": {
+          "current_retail": 59.99,
+          "display_was_now": false,
+          "formatted_current_price": "$59.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 59.99,
+          "location_id": 3991,
+          "external_system_id": "92281864-3991-59.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573678",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe",
+              "primary_image": "GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$12.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($50-$99.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 50",
+              "<B>Maximum Qualifying Item Price:</B> 99.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "92281865",
+        "primary_barcode": "840008267674",
+        "price": {
+          "current_retail": 59.99,
+          "display_was_now": false,
+          "formatted_current_price": "$59.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 59.99,
+          "location_id": 3991,
+          "external_system_id": "92281865-3991-59.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573678",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe",
+              "primary_image": "GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$12.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($50-$99.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 50",
+              "<B>Maximum Qualifying Item Price:</B> 99.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "92084346",
+        "primary_barcode": "840008267599",
+        "price": {
+          "current_retail": 59.99,
+          "display_was_now": false,
+          "formatted_current_price": "$59.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 59.99,
+          "location_id": 3991,
+          "external_system_id": "92084346-3991-59.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573678",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe",
+              "primary_image": "GUEST_f0699d78-50c8-4505-82c2-03b42628b6fe"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$12.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($50-$99.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 50",
+              "<B>Maximum Qualifying Item Price:</B> 99.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "enrichment_data": {
+    "activation_date": "2020-12-01T08:00Z",
+    "open_graph": {
+      "title": "RTIC Outdoors 8qt Road Trip Personal Cooler - White",
+      "type": "product",
+      "image": "https://target.scene7.com/is/image/Target/GUEST_1d6a072d-26d1-498c-880a-2736d07895fe",
+      "url": "/p/rtic-outdoors-road-trip-8qt-personal-hard-sided-cooler-white/-/A-92084346",
+      "description": "Read reviews and buy RTIC Outdoors 8qt Road Trip Personal Cooler - White at Target. Choose from contactless Same Day Delivery, Drive Up and more."
+    },
+    "twitter_card": {
+      "title": "RTIC Outdoors 8qt Road Trip Personal Cooler - White",
+      "card": "summary_large_image",
+      "url": "/p/rtic-outdoors-road-trip-8qt-personal-hard-sided-cooler-white/-/A-92084346",
+      "imageUrl": "https://target.scene7.com/is/image/Target/GUEST_1d6a072d-26d1-498c-880a-2736d07895fe",
+      "description": "Read reviews and buy RTIC Outdoors 8qt Road Trip Personal Cooler - White at Target. Choose from contactless Same Day Delivery, Drive Up and more."
+    }
+  },
+  "technical_specs": {
+    "specifications": {
+      "Capacity (Volume)": "8 Quart",
+      "Number of Beverage Cans Held": "12"
+    }
+  },
+  "compatibility": {},
+  "raw_data_sources": []
+}

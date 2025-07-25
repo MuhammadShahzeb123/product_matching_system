@@ -25,6 +25,9 @@ except ImportError:
     CURL_CFFI_AVAILABLE = False
     print("⚠️  curl_cffi not available. Using standard requests (may be less reliable)")
 
+# Import the search-based extractor
+from amazon_search_extractor import AmazonSearchBasedExtractor
+
 
 class AmazonProductFetcher:
     """
@@ -98,7 +101,7 @@ class AmazonProductFetcher:
     
     def build_amazon_url(self, asin: str) -> str:
         """Build Amazon product URL from ASIN."""
-        return f"https://www.amazon.com/dp/{asin}/"
+        return f"https://www.amazon.com/dp/{asin}"
     
     def fetch_product(self, asin_or_url: str, save_html: bool = False) -> str:
         """
@@ -210,6 +213,12 @@ class EnhancedAmazonProductParser:
             "certifications": self._extract_certifications(soup),
             "environmental": self._extract_environmental_info(soup),
             "usage_context": self._extract_usage_context(soup),
+            # NEW: Enhanced marketplace data
+            "marketplace_data": self._extract_marketplace_data(soup),
+            "seller_info": self._extract_seller_info(soup),
+            "fulfillment_info": self._extract_fulfillment_info(soup),
+            "sales_rank": self._extract_sales_rank(soup),
+            "pack_size": self._extract_pack_size(soup),
         }
         
         # Combine all data
@@ -281,22 +290,25 @@ class EnhancedAmazonProductParser:
                 break
         
         # Brand and title variations for fuzzy matching
-        title = basic_data.get('title', '')
-        brand = basic_data.get('brand', '')
+        title = basic_data.get('title', '') or ''
+        brand = basic_data.get('brand', '') or ''
         
-        if title:
+        if title and isinstance(title, str):
             clean_title = re.sub(r'[^\w\s]', ' ', title.lower())
             clean_title = ' '.join(clean_title.split())
             identifiers['clean_title'] = clean_title
             identifiers['title_keywords'] = self._extract_keywords_from_title(title)
         
-        if brand:
+        if brand and isinstance(brand, str):
             identifiers['brand_normalized'] = brand.lower().strip()
         
         return identifiers
     
     def _extract_keywords_from_title(self, title: str) -> List[str]:
         """Extract meaningful keywords from product title"""
+        if not title or not isinstance(title, str):
+            return []
+            
         stop_words = {
             'and', 'or', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for',
             'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through',
@@ -765,14 +777,18 @@ class EnhancedAmazonProductParser:
         return images
     
     def _extract_pricing(self, soup: BeautifulSoup) -> Dict[str, Any]:
-        """Extract pricing information"""
+        """Extract comprehensive pricing information including buy box details"""
         pricing = {}
         
+        # Primary price selectors
         price_selectors = [
             ".a-price-whole",
             ".a-offscreen",
             "[data-a-price-amount]",
-            ".a-price .a-offscreen"
+            ".a-price .a-offscreen",
+            "#priceblock_dealprice",
+            "#priceblock_ourprice",
+            ".a-price-range"
         ]
         
         for selector in price_selectors:
@@ -782,6 +798,43 @@ class EnhancedAmazonProductParser:
                 if '$' in price_text:
                     pricing['current_price'] = price_text
                     break
+        
+        # Buy box price (specific to buy box area)
+        buybox_price = soup.select_one("#buybox .a-price .a-offscreen, #desktop_buybox .a-price .a-offscreen")
+        if buybox_price:
+            pricing['buybox_price'] = buybox_price.get_text().strip()
+        
+        # List price / MSRP
+        list_price_selectors = [
+            ".a-price.a-text-price .a-offscreen",
+            "[data-a-color='secondary'] .a-price .a-offscreen",
+            ".a-text-strike .a-offscreen"
+        ]
+        
+        for selector in list_price_selectors:
+            element = soup.select_one(selector)
+            if element:
+                pricing['list_price'] = element.get_text().strip()
+                break
+        
+        # Deal price
+        deal_price = soup.select_one("#priceblock_dealprice")
+        if deal_price:
+            pricing['deal_price'] = deal_price.get_text().strip()
+        
+        # Discount percentage
+        discount_elem = soup.select_one(".savingsPercentage, .a-size-large.a-color-price")
+        if discount_elem:
+            discount_text = discount_elem.get_text().strip()
+            if '%' in discount_text:
+                pricing['discount_percentage'] = discount_text
+        
+        # Price per unit
+        unit_price = soup.select_one(".a-size-small.a-color-price")
+        if unit_price:
+            unit_text = unit_price.get_text().strip()
+            if '/' in unit_text:
+                pricing['price_per_unit'] = unit_text
         
         return pricing
     
@@ -998,17 +1051,326 @@ class EnhancedAmazonProductParser:
             "extraction_source": "amazon_complete_fetcher_parser.py"
         }
 
+    def _extract_marketplace_data(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract marketplace-specific data for sellers and fulfillment"""
+        marketplace_data = {}
+        
+        # Extract available buying options count
+        buying_options = soup.select("#buybox-inner, .mbc-offer-display")
+        marketplace_data['total_buying_options'] = len(buying_options)
+        
+        # Extract if there are multiple sellers
+        other_sellers_link = soup.select_one("a[href*='offer-listing'], a[href*='olp'], .olp-link")
+        if other_sellers_link:
+            text = other_sellers_link.get_text().strip()
+            # Extract number of sellers from text like "5 used & new from $25.99"
+            seller_match = re.search(r'(\d+)\s*(?:used\s*&\s*new|new\s*&\s*used|new|used)', text, re.IGNORECASE)
+            if seller_match:
+                marketplace_data['total_sellers'] = int(seller_match.group(1))
+            marketplace_data['other_sellers_text'] = text
+        
+        return marketplace_data
+    
+    def _extract_seller_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract seller information from buy box"""
+        seller_info = {}
+        
+        # Primary seller (buy box winner)
+        sold_by_selectors = [
+            "#merchantInfoFeature_feature_div .offer-display-feature-text-message",
+            ".a-size-small.offer-display-feature-text-message",
+            "#sold-by-message .a-size-small",
+            ".tabular-buybox-text[data-action='merchant-popover'] .a-size-small"
+        ]
+        
+        for selector in sold_by_selectors:
+            seller_elem = soup.select_one(selector)
+            if seller_elem:
+                seller_name = seller_elem.get_text().strip()
+                if seller_name and seller_name.lower() not in ['', 'amazon.com']:
+                    seller_info['primary_seller'] = seller_name
+                    break
+        
+        # If no specific seller found, check if it's Amazon
+        if not seller_info.get('primary_seller'):
+            # Check for Amazon indicators
+            amazon_indicators = soup.select("span:contains('Amazon.com'), .offer-display-feature-text-message")
+            for elem in amazon_indicators:
+                text = elem.get_text().strip()
+                if 'amazon.com' in text.lower():
+                    seller_info['primary_seller'] = 'Amazon.com'
+                    break
+        
+        # Extract seller rating if available
+        seller_rating = soup.select_one(".tabular-buybox-seller-rating, .merchant-rating")
+        if seller_rating:
+            seller_info['seller_rating'] = seller_rating.get_text().strip()
+        
+        return seller_info
+    
+    def _extract_fulfillment_info(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract fulfillment information (FBA, FBM, AMZ)"""
+        fulfillment_info = {}
+        
+        sold_by_text = ""
+        ships_from_text = ""
+        
+        # Extract "Ships from" and "Sold by" information from specific elements
+        ships_from_elem = soup.select_one(".offer-display-feature-text-message")
+        sold_by_elems = soup.select(".offer-display-feature-text-message")
+        
+        # Try to find ships from and sold by in the merchant info section
+        merchant_section = soup.select_one("#merchantInfoFeature_feature_div")
+        if merchant_section:
+            merchant_text = merchant_section.get_text()
+            # Look for "Ships from" and "Sold by" patterns
+            if "ships from" in merchant_text.lower():
+                ships_match = re.search(r'ships from[:\s]*([^\n]+)', merchant_text, re.IGNORECASE)
+                if ships_match:
+                    ships_from_text = ships_match.group(1).strip()
+            
+            if "sold by" in merchant_text.lower():
+                sold_match = re.search(r'sold by[:\s]*([^\n]+)', merchant_text, re.IGNORECASE)
+                if sold_match:
+                    sold_by_text = sold_match.group(1).strip()
+        
+        # Get buy box area text for analysis
+        buybox_text = ""
+        buybox_area = soup.select_one("#buybox, #desktop_buybox, #desktop_qualifiedBuyBox")
+        if buybox_area:
+            buybox_text = buybox_area.get_text().lower()
+        
+        # Check if primary seller is Amazon
+        primary_seller = self._extract_seller_info(soup).get('primary_seller', '')
+        is_amazon_seller = 'amazon' in primary_seller.lower()
+        
+        # Determine fulfillment type based on available information
+        fulfillment_type = "UNKNOWN"
+        
+        # Amazon fulfillment (AMZ) - both shipped and sold by Amazon
+        if is_amazon_seller or ('amazon' in sold_by_text.lower() and 'amazon' in ships_from_text.lower()) or \
+           ('shipped and sold by amazon' in buybox_text):
+            fulfillment_type = "AMZ"
+        
+        # FBA - Ships from Amazon but sold by third party
+        elif 'amazon' in ships_from_text.lower() and 'amazon' not in sold_by_text.lower() and not is_amazon_seller:
+            fulfillment_type = "FBA"
+        
+        # FBM - Ships from and sold by third party
+        elif 'amazon' not in ships_from_text.lower() and 'amazon' not in sold_by_text.lower() and not is_amazon_seller:
+            fulfillment_type = "FBM"
+        
+        # If seller is Amazon but we can't determine shipping, assume AMZ
+        elif is_amazon_seller:
+            fulfillment_type = "AMZ"
+        
+        fulfillment_info.update({
+            'fulfillment_type': fulfillment_type,
+            'ships_from': ships_from_text or 'Not specified',
+            'sold_by': sold_by_text or primary_seller,
+            'is_prime': 'prime' in buybox_text or bool(soup.select(".prime-logo, [alt*='Prime']")),
+            'merchant_section_text': merchant_section.get_text()[:200] + "..." if merchant_section else ""
+        })
+        
+        return fulfillment_info
+    
+    def _extract_sales_rank(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract Best Sellers Rank information"""
+        sales_rank = {}
+        
+        # Try to extract from embedded JSON data first (more reliable)
+        try:
+            script_tags = soup.find_all('script')
+            for script in script_tags:
+                if script.string and 'salesRanks' in script.string:
+                    script_content = script.string
+                    # Look for the complete salesRanks JSON structure
+                    pattern = r'"salesRanks"\s*:\s*(\{[^}]*"rankings"[^}]+\})'
+                    match = re.search(pattern, script_content)
+                    if match:
+                        try:
+                            import json
+                            # Extract and clean the JSON string
+                            json_str = match.group(1)
+                            # Handle HTML entities
+                            json_str = json_str.replace('&amp;', '&').replace('&quot;', '"')
+                            ranks_data = json.loads(json_str)
+                            
+                            if 'rankings' in ranks_data:
+                                sales_rank['sales_ranks'] = []
+                                for ranking in ranks_data['rankings']:
+                                    rank_num = ranking.get('rank')
+                                    category = ranking.get('storeContextName', '')
+                                    rank_type = ranking.get('rankedCategoryType', '')
+                                    
+                                    if rank_num and category:
+                                        sales_rank['sales_ranks'].append({
+                                            'rank': rank_num,
+                                            'category': category,
+                                            'rank_type': rank_type,
+                                            'formatted_rank': f"#{rank_num:,} in {category}"
+                                        })
+                                
+                                # Get the primary (best) rank
+                                if sales_rank.get('sales_ranks'):
+                                    best_rank = min(sales_rank['sales_ranks'], key=lambda x: x['rank'])
+                                    sales_rank['primary_rank'] = best_rank['rank']
+                                    sales_rank['primary_category'] = best_rank['category']
+                                
+                                return sales_rank
+                        except (json.JSONDecodeError, KeyError) as e:
+                            print(f"JSON parsing error: {e}")
+                            continue
+        except Exception as e:
+            print(f"JSON extraction failed: {e}")
+        
+        # Fallback to text extraction if JSON method fails
+        rank_patterns = [
+            r'#([\d,]+)\s+in\s+([^(\n]+?)(?:\s*\([^)]*\))?',
+            r'#([\d,]+)\s+in\s+([^<\n]+?)(?:\s*<)',  # Stop at HTML tags
+            r'Amazon Best Sellers Rank:\s*#([\d,]+)\s+in\s+([^(\n]+?)(?:\s*\([^)]*\))?',
+            r'Best Sellers Rank:\s*#([\d,]+)\s+in\s+([^(\n]+?)(?:\s*\([^)]*\))?'
+        ]
+        
+        # Search in product details sections
+        details_sections = soup.select("#productDetails_detailBullets_sections1, #productDetails_feature_div, #detailBullets_feature_div, .prodDetTable, table.a-keyvalue")
+        
+        # Also search the entire page if the sections don't contain the rank info
+        if not any('#' in section.get_text() for section in details_sections):
+            details_sections = [soup]
+        
+        rank_found = set()  # To avoid duplicates
+        
+        for section in details_sections:
+            section_text = section.get_text()
+            
+            # Also try to extract directly from HTML for better pattern matching
+            section_html = str(section)
+            
+            # Direct search for specific sales rank patterns in HTML
+            html_rank_patterns = [
+                r'#(\d+(?:,\d+)*)\s+in\s+<a[^>]*>([^<]+)</a>',
+                r'#(\d+(?:,\d+)*)\s+in\s+([^<(\n]+?)(?:\s*\([^)]*\))',  # Pattern for non-linked categories
+                r'#(\d+(?:,\d+)*)\s+in\s+([^<(\n]+?)(?:\s*<)',
+            ]
+            
+            for pattern in html_rank_patterns:
+                matches = re.findall(pattern, section_html, re.IGNORECASE | re.DOTALL)
+                if matches:
+                    for rank, category in matches:
+                        try:
+                            rank_num = int(rank.replace(',', ''))
+                            category = category.strip()
+                            
+                            rank_key = f"{rank_num}_{category[:50]}"
+                            if rank_key not in rank_found:
+                                rank_found.add(rank_key)
+                                if 'sales_ranks' not in sales_rank:
+                                    sales_rank['sales_ranks'] = []
+                                sales_rank['sales_ranks'].append({
+                                    'rank': rank_num,
+                                    'category': category,
+                                    'formatted_rank': f"#{rank} in {category}"
+                                })
+                        except (ValueError, AttributeError):
+                            continue
+                            
+            # If HTML patterns found results, skip text patterns
+            if sales_rank.get('sales_ranks'):
+                continue
+            
+            for pattern in rank_patterns:
+                matches = re.findall(pattern, section_text, re.IGNORECASE | re.DOTALL)
+                if matches:
+                    for rank, category in matches:
+                        try:
+                            rank_num = int(rank.replace(',', ''))
+                            # Clean up category text - more aggressive cleaning
+                            category = category.strip()
+                            # Remove HTML tags if any
+                            category = re.sub(r'<[^>]+>', '', category)
+                            # Remove extra text after category name
+                            category = re.sub(r'\s+(See Top|Fabric Type|Refill|Finish|Assembly|Batteries).*', '', category, flags=re.IGNORECASE)
+                            category = re.sub(r'\s{2,}', ' ', category)  # Replace multiple spaces with single space
+                            
+                            rank_key = f"{rank_num}_{category[:50]}"  # Create unique key to avoid duplicates
+                            if rank_key not in rank_found:
+                                rank_found.add(rank_key)
+                                if 'sales_ranks' not in sales_rank:
+                                    sales_rank['sales_ranks'] = []
+                                sales_rank['sales_ranks'].append({
+                                    'rank': rank_num,
+                                    'category': category,
+                                    'formatted_rank': f"#{rank} in {category}"
+                                })
+                        except (ValueError, AttributeError):
+                            continue
+        
+        # Get the primary (best) rank
+        if sales_rank.get('sales_ranks'):
+            best_rank = min(sales_rank['sales_ranks'], key=lambda x: x['rank'])
+            sales_rank['primary_rank'] = best_rank['rank']
+            sales_rank['primary_category'] = best_rank['category']
+        
+        return sales_rank
+    
+    def _extract_pack_size(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """Extract pack size information"""
+        pack_info = {}
+        
+        # Look for pack size in title
+        title = self._extract_title(soup) or ""
+        
+        # Common pack size patterns
+        pack_patterns = [
+            r'pack\s+of\s+(\d+)',
+            r'(\d+)-pack',
+            r'(\d+)\s*pack',
+            r'(\d+)\s*count',
+            r'set\s+of\s+(\d+)',
+            r'(\d+)\s*piece',
+            r'(\d+)\s*pcs',
+            r'(\d+)\s*units'
+        ]
+        
+        search_text = f"{title} {soup.get_text()}"
+        
+        for pattern in pack_patterns:
+            match = re.search(pattern, search_text, re.IGNORECASE)
+            if match:
+                pack_info['pack_size'] = int(match.group(1))
+                pack_info['pack_description'] = match.group(0)
+                break
+        
+        # Look in specifications
+        specs = self._extract_comprehensive_specs(soup)
+        for key, value in specs.items():
+            if 'count' in key.lower() or 'pack' in key.lower():
+                if isinstance(value, str) and any(char.isdigit() for char in value):
+                    # Extract number from specification value
+                    num_match = re.search(r'(\d+)', value)
+                    if num_match:
+                        pack_info['spec_pack_size'] = int(num_match.group(1))
+                        pack_info['spec_description'] = f"{key}: {value}"
+        
+        return pack_info
+
 
 class AmazonProductExtractor:
     """
     Complete Amazon product extraction system that combines fetching and parsing.
     """
     
-    def __init__(self, save_html: bool = False, save_json: bool = True, use_curl_cffi: bool = True):
+    def __init__(self, save_html: bool = False, save_json: bool = True, use_curl_cffi: bool = True, use_search_pricing: bool = True):
         self.fetcher = AmazonProductFetcher(use_curl_cffi=use_curl_cffi)
         self.parser = EnhancedAmazonProductParser()
         self.save_html = save_html
         self.save_json = save_json
+        self.use_search_pricing = use_search_pricing
+        
+        # Initialize search-based extractor for better pricing
+        if self.use_search_pricing:
+            self.search_extractor = AmazonSearchBasedExtractor(use_proxy=True)
     
     def extract_product(self, asin_or_url: str) -> Dict[str, Any]:
         """
@@ -1038,6 +1400,20 @@ class AmazonProductExtractor:
             if "error" in product_data:
                 print(f"❌ Parsing failed: {product_data['error']}")
                 return product_data
+            
+            # Step 2.5: Enhance with search-based pricing (more reliable)
+            if self.use_search_pricing and asin:
+                print(f"\n💰 Enhancing pricing data from search results...")
+                try:
+                    search_product_data = self.search_extractor.get_product_from_asin(asin)
+                    if search_product_data:
+                        # Merge search-based pricing into product data
+                        self._merge_search_pricing(product_data, search_product_data)
+                        print(f"✅ Enhanced pricing data from search results")
+                    else:
+                        print(f"⚠️ Could not get search-based pricing for ASIN: {asin}")
+                except Exception as e:
+                    print(f"⚠️ Search-based pricing failed: {e}")
             
             # Store extracted data for comparison methods
             self.parser.extracted_data = product_data
@@ -1078,11 +1454,62 @@ class AmazonProductExtractor:
         print(f"🆔 ASIN: {product_data.get('asin', 'N/A')}")
         print(f"🔢 Model: {matching.get('model_number', 'N/A')}")
         print(f"🔢 UPC: {matching.get('barcode', 'N/A')}")
+        
+        # Show marketplace information
+        marketplace_data = product_data.get("marketplace_data", {})
+        seller_info = product_data.get("seller_info", {})
+        fulfillment_info = product_data.get("fulfillment_info", {})
+        sales_rank = product_data.get("sales_rank", {})
+        pack_size = product_data.get("pack_size", {})
+        
         print(f"💰 Price: {pricing.get('current_price', 'N/A')}")
+        if pricing.get('search_current_price'):
+            print(f"🔍 Search Price: {pricing.get('search_current_price')}")
         if pricing.get('list_price'):
-            print(f"   List Price: {pricing.get('list_price', 'N/A')}")
-            if pricing.get('savings'):
-                print(f"   Savings: {pricing.get('savings', 'N/A')}")
+            print(f"📋 List Price: {pricing.get('list_price')}")
+        if pricing.get('coupon_info'):
+            print(f"🎫 Coupon: {pricing.get('coupon_info')}")
+        if pricing.get('more_buying_choices'):
+            print(f"🛒 More Buying Choices: {pricing['more_buying_choices'].get('text', 'Available')}")
+        if pricing.get('buybox_price'):
+            print(f"📦 Buy Box Price: {pricing.get('buybox_price')}")
+        if pricing.get('list_price'):
+            print(f"🏷️  List Price: {pricing.get('list_price')}")
+        
+        # Show fulfillment information
+        fulfillment_type = fulfillment_info.get('fulfillment_type', 'UNKNOWN')
+        print(f"🚚 Fulfillment: {fulfillment_type}")
+        if fulfillment_info.get('sold_by'):
+            print(f"🏪 Sold by: {fulfillment_info.get('sold_by')}")
+        if fulfillment_info.get('ships_from'):
+            print(f"📦 Ships from: {fulfillment_info.get('ships_from')}")
+        if fulfillment_info.get('is_prime'):
+            print(f"⚡ Prime Eligible: Yes")
+        
+        # Show seller information
+        if seller_info.get('primary_seller'):
+            print(f"🏪 Primary Seller: {seller_info.get('primary_seller')}")
+        if seller_info.get('search_seller_name'):
+            print(f"🔍 Search Seller: {seller_info.get('search_seller_name')}")
+        if seller_info.get('fulfillment_type'):
+            fulfillment_display = {
+                'FBA': '📦 Fulfilled by Amazon (FBA)',
+                'FBM': '🏪 Fulfilled by Merchant (FBM)', 
+                'AMZ': '🛒 Sold by Amazon (AMZ)'
+            }.get(seller_info['fulfillment_type'], seller_info['fulfillment_type'])
+            print(f"📋 Fulfillment: {fulfillment_display}")
+        if seller_info.get('prime_eligible'):
+            print(f"⚡ Prime Enhanced: ✅ Eligible")
+        if marketplace_data.get('total_sellers'):
+            print(f"🛒 Total Sellers: {marketplace_data.get('total_sellers')}")
+        
+        # Show sales rank
+        if sales_rank.get('primary_rank'):
+            print(f"📈 Sales Rank: #{sales_rank.get('primary_rank'):,} in {sales_rank.get('primary_category', 'Unknown')}")
+        
+        # Show pack size
+        if pack_size.get('pack_size'):
+            print(f"📦 Pack Size: {pack_size.get('pack_size')} units")
         
         # Display dimensions
         dimensions = physical.get('dimensions', {})
@@ -1126,6 +1553,95 @@ class AmazonProductExtractor:
         print(f"🕐 Timestamp: {product_data.get('parsed_at', 'N/A')}")
         print(f"🔍 Fingerprint: {product_data.get('fingerprint', 'N/A')[:16]}...")
         print(f"=" * 60)
+    
+    def _merge_search_pricing(self, product_data: Dict, search_data: Dict):
+        """
+        Merge search-based pricing data into the main product data.
+        Search results often have more reliable pricing and seller info.
+        """
+        try:
+            search_pricing = search_data.get('pricing', {})
+            search_seller = search_data.get('seller_info', {})
+            search_basic = search_data.get('basic_info', {})
+            
+            # Enhance pricing section
+            if not product_data.get('pricing'):
+                product_data['pricing'] = {}
+            
+            pricing = product_data['pricing']
+            
+            # Current price from search (more reliable)
+            if search_pricing.get('current_price'):
+                pricing['search_current_price'] = search_pricing['current_price']
+                pricing['formatted_current_price'] = search_pricing['current_price']
+                
+                # If we don't have a price from detail page, use search price
+                if not pricing.get('current_price'):
+                    pricing['current_price'] = search_pricing['current_price']
+                    pricing['price'] = search_pricing.get('price', 0.0)
+            
+            # List price from search (original/was price)
+            if search_pricing.get('list_price'):
+                pricing['search_list_price'] = search_pricing['list_price']
+                pricing['list_price'] = search_pricing['list_price']
+                pricing['was_price'] = search_pricing['list_price']
+            
+            # Coupon information
+            if search_pricing.get('coupon'):
+                pricing['coupon_info'] = search_pricing['coupon']
+                pricing['has_coupon'] = True
+            
+            # More buying choices
+            if search_pricing.get('more_buying_choices'):
+                pricing['more_buying_choices'] = search_pricing['more_buying_choices']
+            
+            # Enhance seller information
+            if not product_data.get('seller_info'):
+                product_data['seller_info'] = {}
+            
+            seller_info = product_data['seller_info']
+            
+            # Prime eligibility
+            if search_seller.get('prime_eligible') is not None:
+                seller_info['prime_eligible'] = search_seller['prime_eligible']
+                if search_seller['prime_eligible']:
+                    seller_info['fulfillment_type'] = search_seller.get('fulfillment_type', 'FBA')
+            
+            # Seller name from search
+            if search_seller.get('seller_name'):
+                seller_info['search_seller_name'] = search_seller['seller_name']
+            
+            # Add search metadata
+            if not product_data.get('search_enhancement'):
+                product_data['search_enhancement'] = {}
+            
+            product_data['search_enhancement'] = {
+                'enhanced_at': datetime.now().isoformat(),
+                'source': 'amazon_search_results',
+                'pricing_enhanced': bool(search_pricing),
+                'seller_enhanced': bool(search_seller),
+                'search_title': search_basic.get('name', ''),
+                'search_image_url': search_basic.get('image_url', '')
+            }
+            
+            # Add reviews from search if available
+            search_reviews = search_data.get('reviews', {})
+            if search_reviews and not product_data.get('reviews', {}).get('average_rating'):
+                if not product_data.get('reviews'):
+                    product_data['reviews'] = {}
+                
+                if search_reviews.get('rating'):
+                    product_data['reviews']['search_rating'] = search_reviews['rating']
+                    product_data['reviews']['average_rating'] = search_reviews['rating']
+                
+                if search_reviews.get('review_count'):
+                    product_data['reviews']['search_review_count'] = search_reviews['review_count']
+                    product_data['reviews']['total_reviews'] = search_reviews['review_count']
+            
+            print(f"✅ Successfully merged search-based pricing and seller data")
+            
+        except Exception as e:
+            print(f"⚠️ Error merging search pricing: {e}")
 
 
 def main():

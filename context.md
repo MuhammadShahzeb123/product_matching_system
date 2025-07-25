@@ -1,58 +1,112 @@
 # Product Matching System Context
 
-## Current State
+## Current State (July 26, 2025)
 
-The product matching system compares Amazon and Target products and generates JSON reports. Currently:
+- ✅ **Removed all sample data fallback systems**
+- ✅ **Enhanced seller and shipment information extraction**
+- ✅ **Implemented regex-based seller/shipment detection**
+- ✅ **Now only uses live Target.com search results**
+- ✅ **UPC cleaning and search strategy maintained**
+- ✅ **FIXED: AttributeError in seller/shipment extraction** (July 26, 2025)
 
-### Issues to Fix
+## Recent Major Changes Implemented
 
-1. **Missing Product URLs**: Reports only contain ASIN/TCIN but no clickable product URLs
-2. **Incomplete Price Extraction**: Prices may not be properly extracted from both platforms
+### 1. ✅ **FIXED: AttributeError 'dict' object has no attribute 'strip'**
+- **🐛 Issue**: `_extract_enhanced_seller_shipment_info()` was trying to call `.strip()` on dict objects
+- **✅ Fix**: Completely rewrote text source handling with safe string conversion
+- **✅ New**: Added `source_paths` list with proper (name, value) tuples
+- **✅ New**: Safe conversion handling for dicts, lists, and other objects
+- **✅ New**: Enhanced validation to skip empty/meaningless text
+- **✅ Removed**: Redundant `import re` (already imported at top of file)
+- **✅ Clean**: More robust error handling with try/catch blocks
 
-### Current Report Structure
+### 2. ✅ **REMOVED Sample Data Fallback System**
+- **❌ Removed**: `_get_sample_target_products()` method completely
+- **❌ Removed**: `_load_sample_target_product_details()` method completely
+- **❌ Removed**: All fallback logic to local JSON files
+- **✅ Updated**: `_search_target_products()` now only does live search
+- **✅ Updated**: Error handling now returns empty lists instead of sample data
+- **✅ Clean**: System now ONLY searches Target.com live - no local file fallbacks
 
-- Amazon products show: title, asin, brand, price
-- Target products show: title, tcin, brand, price, url (but url may be empty)
+### 2. ✅ **ENHANCED Seller & Shipment Information Extraction**
+- **✅ New**: `_extract_enhanced_seller_shipment_info()` method with regex patterns
+- **✅ New**: `_clean_seller_name()` method for cleaning extracted names
+- **✅ Regex Patterns**:
+  - `"Sold by * and Shipped by *"` - Main pattern requested by user
+  - `"Ships from and sold by *"` - Alternative pattern
+  - `"Sold by *"` - Seller-only pattern
+  - `"Shipped by *"` - Shipper-only pattern
+  - `"Ships from *"` - Alternative shipper pattern
 
-## Changes Made
+### 3. ✅ **Intelligent Shipment Type Detection**
+- **✅ Logic**: If `shipped by` contains "amazon" → "Shipped by Amazon"
+- **✅ Logic**: If `shipped by` is NOT amazon → "Shipped by Seller"
+- **✅ Clean**: Removes HTML tags, extra spaces, trailing punctuation from names
 
-### 1. Added Complete Product URLs
+### 4. ✅ **Enhanced Reporting with Seller/Shipment Info**
+- **✅ Updated**: `_generate_url_matching_report()` shows seller & shipment details
+- **✅ Updated**: `_generate_matching_report()` shows enhanced fulfillment info
+- **✅ Display**: Shows extracted text patterns for debugging
+- **✅ Format**: Clear icons and formatting for seller/shipment info
 
-- **Amazon URLs**: Built from ASIN using format `https://www.amazon.com/dp/{asin}/`
-- **Target URLs**: Built from TCIN using format `https://www.target.com/p/-/A-{tcin}`
+## Current Search Strategy (Maintained)
 
-### 2. Enhanced Price Extraction
+### UPC Search Strategy ✅
+- **Strategy 1**: UPC/barcode search (highest precision)
+- **Strategy 2**: Amazon title + brand search (`<title> <brand>`)
+- **Strategy 3**: Brand only search (fallback)
+- **Strategy 4**: Base search term (final fallback)
 
-- Improved price extraction logic for both platforms
-- Added fallback methods to ensure prices are captured
+### UPC Cleaning ✅
+- **Special Character Removal**: Automatically strips characters like `‎`
+- **Validation**: Ensures cleaned UPC is numeric and proper length (10-14 digits)
+- **Example**: `‎199414326476` → `199414326476`
 
-### 3. Updated Report Generation
+## Implementation Details
 
-- Modified both `_generate_matching_report()` and `_generate_url_matching_report()` methods
-- Added URL generation logic for both platforms
-- Enhanced price extraction paths
+### Seller/Shipment Extraction Sources
+- **Primary**: `fulfillment_text`, `seller_info`, `shipping_info`
+- **Secondary**: `pricing.seller_info`, `details.seller_info`
+- **Fallback**: `raw_html`, `description` if available
+
+### Regex Pattern Examples
+```
+"Sold by MilleLoom and Shipped by Amazon" →
+  - seller_name: "MilleLoom"
+  - shipped_by: "Amazon"
+  - shipment_type: "Shipped by Amazon"
+
+"Ships from and sold by Amazon.com" →
+  - seller_name: "Amazon.com"
+  - shipped_by: "Amazon.com"
+  - shipment_type: "Shipped by Amazon"
+```
 
 ## Files Modified
 
-- `product_matching_system.py`: Main matching logic and report generation
+- ✅ `product_matching_system.py` - Removed sample fallbacks, added seller/shipment extraction
+- ✅ `context.md` - Updated to reflect all changes
 
-## URL Formats
+## What Was Removed
 
-- **Amazon**: `https://www.amazon.com/dp/{asin}/`
-- **Target**: `https://www.target.com/p/-/A-{tcin}`
+- ❌ `_get_sample_target_products()` - No more local file fallbacks
+- ❌ `_load_sample_target_product_details()` - No more sample data loading
+- ❌ `allow_sample_fallback` parameter - All fallback logic removed
+- ❌ All references to "sample data", "demonstration", "pre-downloaded products"
 
-## New Methods Added
+## What Was Added
 
-1. `_build_amazon_url(asin)`: Builds complete Amazon product URL from ASIN
-2. `_build_target_url(tcin)`: Builds complete Target product URL from TCIN
-3. `_extract_amazon_price(product)`: Enhanced Amazon price extraction with fallbacks
-4. `_extract_target_price(product)`: Enhanced Target price extraction with fallbacks
+- ✅ Enhanced regex-based seller/shipment extraction
+- ✅ Intelligent Amazon vs Seller shipment detection
+- ✅ Clean seller name processing
+- ✅ Enhanced reporting with seller/shipment details
+- ✅ Live-only Target.com search (no fallbacks)
 
-## Updated Report Structure
+## System Behavior Now
 
-Both Amazon and Target products now include:
-- **title**: Product name
-- **asin/tcin**: Product identifier
-- **brand**: Product brand
-- **price**: Formatted price with $ symbol
-- **url**: Complete clickable product URL
+1. **Amazon Product**: Extracts title, brand, UPC from Amazon product data
+2. **Target Search**: Uses UPC first, then title+brand, then brand, then base term
+3. **Live Search Only**: Only searches Target.com live - no local files
+4. **Seller Extraction**: Uses regex to find "Sold by * and Shipped by *" patterns
+5. **Shipment Logic**: Amazon = "Shipped by Amazon", Others = "Shipped by Seller"
+6. **Enhanced Reports**: Shows all seller/shipment information clearly

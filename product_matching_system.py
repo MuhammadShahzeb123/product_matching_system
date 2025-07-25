@@ -191,11 +191,11 @@ class ProductMatchingScorer:
             total_score += price_score
             score_breakdown['price_match'] = price_score
 
-        # 8. Category Match
-        category_score = self._check_category_match(amazon_product, target_product)
-        if category_score > 0:
-            total_score += category_score
-            score_breakdown['category_match'] = category_score
+        # 8. Category Match - REMOVED per user request (not effective for accurate matching)
+        # category_score = self._check_category_match(amazon_product, target_product)
+        # if category_score > 0:
+        #     total_score += category_score
+        #     score_breakdown['category_match'] = category_score
 
         # 9. Color Match
         color_score = self._check_color_match(amazon_product, target_product)
@@ -1004,8 +1004,8 @@ class ProductMatchingSystem:
         """Initialize the product matching system"""
         self.proxy_config = proxy_config or {"url": ProxyConfig.DEFAULT_PROXY}
 
-        # Initialize components
-        self.amazon_extractor = AmazonProductExtractor()
+        # Initialize components with search-based pricing enabled for more reliable pricing
+        self.amazon_extractor = AmazonProductExtractor(use_search_pricing=True)
         self.target_extractor = TargetProductExtractor()
         self.scorer = ProductMatchingScorer()
 
@@ -1057,10 +1057,292 @@ class ProductMatchingSystem:
             return ""
         return f"https://www.target.com/p/-/A-{tcin}"
 
+    def _extract_amazon_marketplace_info(self, amazon_product: Dict) -> Dict[str, Any]:
+        """Extract marketplace information from Amazon product data"""
+        marketplace_info = {}
+
+        # Sales rank information
+        sales_rank = amazon_product.get('sales_rank', {})
+        if sales_rank and sales_rank.get('sales_ranks'):
+            primary_rank_info = sales_rank['sales_ranks'][0] if sales_rank['sales_ranks'] else {}
+            marketplace_info['sales_rank'] = {
+                'primary_rank': primary_rank_info.get('rank'),
+                'primary_category': primary_rank_info.get('category', ''),
+                'all_ranks': sales_rank.get('sales_ranks', [])
+            }
+
+        # Pack size information
+        pack_size = amazon_product.get('pack_size', {})
+        if pack_size:
+            marketplace_info['pack_size'] = {
+                'size': pack_size.get('pack_size', 1),
+                'description': pack_size.get('pack_description', '')
+            }
+
+        # Fulfillment information (from fulfillment_info section)
+        fulfillment_info = amazon_product.get('fulfillment_info', {})
+        if fulfillment_info:
+            marketplace_info['fulfillment'] = {
+                'type': fulfillment_info.get('fulfillment_type', 'Unknown'),
+                'sold_by': fulfillment_info.get('sold_by', ''),
+                'ships_from': fulfillment_info.get('ships_from', ''),
+                'is_prime': fulfillment_info.get('is_prime', False)
+            }
+
+        # Enhanced seller and shipment extraction using regex patterns
+        enhanced_fulfillment = self._extract_enhanced_seller_shipment_info(amazon_product)
+        if enhanced_fulfillment:
+            marketplace_info['enhanced_fulfillment'] = enhanced_fulfillment
+
+        # Pricing details with search-enhanced pricing support
+        pricing = amazon_product.get('pricing', {})
+        if pricing:
+            # Enhanced pricing structure with search-based pricing
+            marketplace_info['pricing'] = {
+                'buybox_price': pricing.get('current_price', ''),
+                'search_current_price': pricing.get('search_current_price', pricing.get('formatted_current_price', '')),
+                'list_price': pricing.get('list_price', ''),
+                'search_list_price': pricing.get('search_list_price', ''),
+                'was_price': pricing.get('was_price', ''),
+                'deal_price': pricing.get('deal_price', ''),
+                'discount': pricing.get('discount', ''),
+                'more_buying_choices': pricing.get('more_buying_choices', {}),
+                'coupon_info': pricing.get('coupon_info', ''),
+                'price_comparison': {
+                    'detail_page_price': pricing.get('current_price', ''),
+                    'search_results_price': pricing.get('search_current_price', pricing.get('formatted_current_price', '')),
+                    'price_source': 'search_enhanced' if pricing.get('search_current_price') else 'detail_page'
+                }
+            }
+
+        return marketplace_info
+
+    def _extract_enhanced_seller_shipment_info(self, amazon_product: Dict) -> Dict[str, Any]:
+        """
+        Extract enhanced seller and shipment information using regex patterns
+        Patterns like 'Sold by * and Shipped by *'
+        """
+
+        enhanced_info = {
+            'seller_name': '',
+            'shipped_by': '',
+            'shipment_type': '',
+            'extracted_patterns': []
+        }
+
+        # Multiple possible sources of seller/shipment text - convert all to strings safely
+        text_sources = []
+        
+        # List of paths to check for seller/shipment info
+        source_paths = [
+            ('fulfillment_text', amazon_product.get('fulfillment_text', '')),
+            ('seller_info', amazon_product.get('seller_info', '')),
+            ('shipping_info', amazon_product.get('shipping_info', '')),
+            ('delivery_info', amazon_product.get('delivery_info', '')),
+            ('marketplace_info', amazon_product.get('marketplace_info', '')),
+            # Check within pricing section for seller info
+            ('pricing.seller_info', amazon_product.get('pricing', {}).get('seller_info', '')),
+            ('pricing.fulfillment_text', amazon_product.get('pricing', {}).get('fulfillment_text', '')),
+            # Check within details/specifications
+            ('details.seller_info', amazon_product.get('details', {}).get('seller_info', '')),
+            ('specifications.seller_info', amazon_product.get('specifications', {}).get('seller_info', '')),
+        ]
+        
+        # Also check in raw HTML or description if available
+        if 'raw_html' in amazon_product:
+            source_paths.append(('raw_html', amazon_product.get('raw_html', '')))
+        if 'description' in amazon_product:
+            source_paths.append(('description', amazon_product.get('description', '')))
+        
+        # Convert all sources to strings safely
+        for source_name, source_value in source_paths:
+            try:
+                if source_value is not None:
+                    # Convert to string, handling dicts, lists, etc.
+                    if isinstance(source_value, (dict, list)):
+                        text_str = str(source_value)
+                    else:
+                        text_str = str(source_value).strip()
+                    
+                    # Only add non-empty meaningful text
+                    if text_str and text_str not in ['{}', '[]', 'None', 'null']:
+                        text_sources.append(text_str)
+            except Exception as e:
+                # Skip problematic sources
+                continue
+
+        # Alternative patterns
+        patterns = [
+            # "Sold by X and Shipped by Y"
+            r'[Ss]old\s+by\s+([^,\n\r]+?)\s+and\s+[Ss]hipped\s+by\s+([^,\n\r\.]+)',
+            # "Ships from and sold by X"
+            r'[Ss]hips\s+from\s+and\s+sold\s+by\s+([^,\n\r\.]+)',
+            # "Sold by X"
+            r'[Ss]old\s+by\s+([^,\n\r\.]+)',
+            # "Shipped by X"
+            r'[Ss]hipped\s+by\s+([^,\n\r\.]+)',
+            # "Ships from X"
+            r'[Ss]hips\s+from\s+([^,\n\r\.]+)',
+        ]
+
+        for text in text_sources:
+            # Text is already converted to string and validated
+            if not text or len(text.strip()) == 0:
+                continue
+                
+            # Skip obvious non-useful text
+            clean_text = text.strip().lower()
+            if clean_text in ['none', 'null', '{}', '[]', '""', "''", 'undefined']:
+                continue
+
+            for i, pattern in enumerate(patterns):
+                matches = re.finditer(pattern, text, re.IGNORECASE)
+
+                for match in matches:
+                    if i == 0:  # Main pattern: "Sold by X and Shipped by Y"
+                        seller = match.group(1).strip()
+                        shipper = match.group(2).strip()
+
+                        enhanced_info['seller_name'] = seller
+                        enhanced_info['shipped_by'] = shipper
+
+                        # Determine shipment type
+                        if 'amazon' in shipper.lower():
+                            enhanced_info['shipment_type'] = 'Shipped by Amazon'
+                        else:
+                            enhanced_info['shipment_type'] = 'Shipped by Seller'
+
+                        enhanced_info['extracted_patterns'].append({
+                            'pattern': 'sold_by_and_shipped_by',
+                            'text': match.group(0),
+                            'seller': seller,
+                            'shipper': shipper
+                        })
+
+                    elif i == 1:  # "Ships from and sold by X"
+                        seller = match.group(1).strip()
+                        enhanced_info['seller_name'] = seller
+                        enhanced_info['shipped_by'] = seller  # Same entity
+
+                        if 'amazon' in seller.lower():
+                            enhanced_info['shipment_type'] = 'Shipped by Amazon'
+                        else:
+                            enhanced_info['shipment_type'] = 'Shipped by Seller'
+
+                        enhanced_info['extracted_patterns'].append({
+                            'pattern': 'ships_from_and_sold_by',
+                            'text': match.group(0),
+                            'seller': seller,
+                            'shipper': seller
+                        })
+
+                    elif i == 2:  # "Sold by X"
+                        seller = match.group(1).strip()
+                        if not enhanced_info['seller_name']:  # Don't override if already found
+                            enhanced_info['seller_name'] = seller
+
+                        enhanced_info['extracted_patterns'].append({
+                            'pattern': 'sold_by',
+                            'text': match.group(0),
+                            'seller': seller
+                        })
+
+                    elif i == 3:  # "Shipped by X"
+                        shipper = match.group(1).strip()
+                        if not enhanced_info['shipped_by']:  # Don't override if already found
+                            enhanced_info['shipped_by'] = shipper
+
+                            if 'amazon' in shipper.lower():
+                                enhanced_info['shipment_type'] = 'Shipped by Amazon'
+                            else:
+                                enhanced_info['shipment_type'] = 'Shipped by Seller'
+
+                        enhanced_info['extracted_patterns'].append({
+                            'pattern': 'shipped_by',
+                            'text': match.group(0),
+                            'shipper': shipper
+                        })
+
+                    elif i == 4:  # "Ships from X"
+                        shipper = match.group(1).strip()
+                        if not enhanced_info['shipped_by']:  # Don't override if already found
+                            enhanced_info['shipped_by'] = shipper
+
+                            if 'amazon' in shipper.lower():
+                                enhanced_info['shipment_type'] = 'Shipped by Amazon'
+                            else:
+                                enhanced_info['shipment_type'] = 'Shipped by Seller'
+
+                        enhanced_info['extracted_patterns'].append({
+                            'pattern': 'ships_from',
+                            'text': match.group(0),
+                            'shipper': shipper
+                        })
+
+        # Clean up extracted names
+        if enhanced_info['seller_name']:
+            enhanced_info['seller_name'] = self._clean_seller_name(enhanced_info['seller_name'])
+        if enhanced_info['shipped_by']:
+            enhanced_info['shipped_by'] = self._clean_seller_name(enhanced_info['shipped_by'])
+
+        # If we still don't have shipment type but have shipped_by, determine it
+        if not enhanced_info['shipment_type'] and enhanced_info['shipped_by']:
+            if 'amazon' in enhanced_info['shipped_by'].lower():
+                enhanced_info['shipment_type'] = 'Shipped by Amazon'
+            else:
+                enhanced_info['shipment_type'] = 'Shipped by Seller'
+
+        return enhanced_info
+
+    def _clean_seller_name(self, name: str) -> str:
+        """Clean up seller/shipper names by removing common artifacts"""
+        if not name:
+            return name
+
+        # Remove common HTML artifacts and extra spaces
+        name = re.sub(r'<[^>]+>', '', name)  # Remove HTML tags
+        name = re.sub(r'\s+', ' ', name)     # Normalize whitespace
+        name = name.strip()
+
+        # Remove common trailing artifacts
+        name = re.sub(r'\s*[\.\,\;\:]$', '', name)  # Remove trailing punctuation
+        name = re.sub(r'\s*\([^)]*\)$', '', name)   # Remove trailing parentheses content
+
+        return name.strip()
+
     def _extract_amazon_price(self, product: Dict) -> str:
-        """Extract price from Amazon product data with multiple fallbacks"""
-        price_paths = [
-            'pricing.formatted_current_price',
+        """Extract price from Amazon product data with multiple fallbacks, prioritizing search-based pricing"""
+        # Prioritize search-based pricing paths first (more reliable)
+        search_price_paths = [
+            'pricing.search_current_price',
+            'pricing.formatted_current_price'
+        ]
+
+        # Try search-based pricing first
+        for path in search_price_paths:
+            try:
+                keys = path.split('.')
+                value = product
+                for key in keys:
+                    if isinstance(value, dict) and key in value:
+                        value = value[key]
+                    else:
+                        value = None
+                        break
+
+                if value:
+                    # Clean and format price
+                    price_str = str(value).strip()
+                    if price_str and price_str != "0" and price_str.lower() != "none":
+                        # Add $ if not present
+                        if not price_str.startswith('$') and price_str.replace('.', '').replace(',', '').isdigit():
+                            price_str = f"${price_str}"
+                        return f"{price_str} (search-enhanced)"
+            except:
+                continue
+
+        # Fallback to traditional pricing paths
+        fallback_price_paths = [
             'pricing.current_price',
             'price.current',
             'price',
@@ -1068,7 +1350,7 @@ class ProductMatchingSystem:
             'current_price'
         ]
 
-        for path in price_paths:
+        for path in fallback_price_paths:
             try:
                 keys = path.split('.')
                 value = product
@@ -1131,29 +1413,36 @@ class ProductMatchingSystem:
     def _create_intelligent_target_search_query(self, amazon_product: Dict, base_search_term: str = "") -> List[str]:
         """
         Create intelligent Target search queries based on Amazon product data.
-        
-        Strategy:
-        1. First try UPC/barcode search (most precise)
-        2. Then try brand + dimensions + base search term
-        3. Finally try brand + base search term as fallback
-        
+
+        Enhanced Strategy:
+        1. First try UPC/barcode search (most precise - exact product match)
+        2. Try Amazon product title + brand search (high precision)
+        3. Try brand only search (fallback)
+        4. Try base search term (final fallback)
+
         Args:
             amazon_product: Amazon product data dictionary
-            base_search_term: Original search term (e.g., "gaming chair")
-            
+            base_search_term: Original search term (e.g., "spoon set")
+
         Returns:
             List of search queries ordered by precision (best first)
         """
         search_queries = []
-        
-        # Strategy 1: UPC/Barcode search (highest precision)
+
+        # Strategy 1: UPC/Barcode search (highest precision - exact product match)
+        print("   🎯 Strategy 1: Searching for UPC/Barcode...")
         upc_paths = [
             'specifications.UPC',
-            'specifications.Global Trade Identification Number', 
+            'specifications.GTIN',
+            'specifications.EAN',
+            'specifications.Global Trade Identification Number',
+            'specifications.European Article Number',
             'matching_data.barcode',
-            'barcode'
+            'barcode',
+            'gtin',
+            'upc'
         ]
-        
+
         for path in upc_paths:
             try:
                 keys = path.split('.')
@@ -1164,130 +1453,193 @@ class ProductMatchingSystem:
                     else:
                         value = None
                         break
-                
+
                 if value and str(value).strip() and len(str(value).strip()) >= 10:
                     upc = str(value).strip()
-                    search_queries.append(upc)
-                    print(f"   🎯 Strategy 1: UPC search with '{upc}'")
-                    break
+                    # Clean UPC - remove any special characters and keep only digits
+                    clean_upc = ''.join(filter(str.isdigit, upc))
+                    # Validate UPC format (should be numeric and of appropriate length)
+                    if clean_upc and len(clean_upc) in [10, 11, 12, 13, 14]:
+                        search_queries.append(clean_upc)
+                        print(f"      ✅ Found UPC/Barcode: '{clean_upc}' (cleaned from '{upc}')")
+                        break
             except:
                 continue
-        
-        # Strategy 2: Brand + Dimensions + Base term
-        brand = amazon_product.get('brand', '').strip()
-        
-        # Extract dimensions
-        dimensions_text = ""
-        try:
-            # Try multiple dimension sources
-            dimension_sources = [
-                amazon_product.get('specifications', {}).get('Product Dimensions', ''),
-                amazon_product.get('physical_attributes', {}).get('dimensions', {}).get('original_text', ''),
-                amazon_product.get('specifications', {}).get('Size', '')
-            ]
-            
-            for dims in dimension_sources:
-                if dims and isinstance(dims, str) and len(dims.strip()) > 5:
-                    dimensions_text = dims.strip()
-                    break
-        except:
-            pass
-        
-        if brand and dimensions_text:
-            # Clean up dimensions text for search
-            # Remove quotes and extra formatting
-            clean_dimensions = dimensions_text.replace('"', ' inch').replace('×', 'x').replace('×', 'x')
-            
-            if base_search_term:
-                query = f"{base_search_term} {brand} {clean_dimensions}"
+
+        # Strategy 2: Title + Brand search (when UPC not found)
+        print("   🎯 Strategy 2: Title + Brand search...")
+
+        # Extract Amazon product title
+        amazon_title = amazon_product.get('title', '').strip()
+
+        # Extract brand
+        brand = amazon_product.get('brand', '').strip() or amazon_product.get('specifications', {}).get('Brand Name', '').strip()
+
+        if amazon_title:
+            if brand:
+                query = f"{amazon_title} {brand}"
+                search_queries.append(query)
+                print(f"      ✅ Title + Brand: '{query[:80]}...'")
             else:
-                query = f"{brand} {clean_dimensions}"
-            
-            search_queries.append(query)
-            print(f"   🎯 Strategy 2: Brand + Dimensions search with '{query[:60]}...'")
-        
-        # Strategy 3: Brand + Base term (medium precision)
-        if brand:
-            if base_search_term:
-                query = f"{base_search_term} {brand}"
-            else:
-                query = brand
-            
-            search_queries.append(query)
-            print(f"   🎯 Strategy 3: Brand search with '{query}'")
-        
-        # Strategy 4: Just base term (fallback)
+                # If no brand, just use title
+                search_queries.append(amazon_title)
+                print(f"      ✅ Title only: '{amazon_title[:80]}...'")
+
+        # Strategy 3: Brand only (fallback)
+        if brand and brand not in [q for q in search_queries]:
+            search_queries.append(brand)
+            print(f"      ✅ Brand fallback: '{brand}'")
+
+        # Strategy 4: Base search term (final fallback)
         if base_search_term and base_search_term not in search_queries:
             search_queries.append(base_search_term)
-            print(f"   🎯 Strategy 4: Base term fallback with '{base_search_term}'")
-        
+            print(f"      ✅ Base term fallback: '{base_search_term}'")
+
+        print(f"   📊 Generated {len(search_queries)} search strategies")
         return search_queries
+
+    def _validate_upc_search_results(self, products: List[Dict], upc_query: str, amazon_product: Dict) -> List[Dict]:
+        """
+        Validate that UPC search results are actually related to the Amazon product.
+        This prevents matching completely unrelated products when Target's UPC search
+        falls back to sample data.
+        """
+        if not products:
+            return []
+
+        # Extract key terms from Amazon product for validation
+        amazon_title = amazon_product.get('title', '').lower()
+        amazon_brand = (amazon_product.get('brand', '') or
+                       amazon_product.get('specifications', {}).get('Brand Name', '')).lower()
+        amazon_categories = amazon_product.get('categories', [])
+
+        # Get key words from Amazon product
+        amazon_keywords = set()
+        if amazon_title:
+            # Extract meaningful words (length > 3, not common words)
+            words = amazon_title.replace('-', ' ').split()
+            amazon_keywords.update([w for w in words if len(w) > 3 and
+                                  w not in ['with', 'that', 'this', 'will', 'have', 'from', 'they']])
+
+        if amazon_brand:
+            amazon_keywords.add(amazon_brand.strip())
+
+        # Add category keywords
+        for cat in amazon_categories:
+            if isinstance(cat, str):
+                amazon_keywords.add(cat.lower())
+
+        valid_products = []
+
+        for product in products:
+            # Extract Target product info
+            target_title = product.get('title', '').lower()
+            target_brand = product.get('brand', '').lower()
+
+            # Calculate keyword overlap
+            target_keywords = set()
+            if target_title:
+                words = target_title.replace('-', ' ').split()
+                target_keywords.update([w for w in words if len(w) > 3])
+
+            if target_brand:
+                target_keywords.add(target_brand.strip())
+
+            # Check for meaningful overlap
+            overlap = amazon_keywords.intersection(target_keywords)
+
+            # Consider valid if:
+            # 1. Brands match, OR
+            # 2. At least 2 meaningful keywords overlap, OR
+            # 3. Product types seem related (dishwasher vs kitchen, etc.)
+            if (amazon_brand and target_brand and amazon_brand == target_brand) or \
+               (len(overlap) >= 2) or \
+               (any(keyword in target_title for keyword in ['dishwasher', 'kitchen', 'appliance'] if 'dishwasher' in amazon_title)):
+                valid_products.append(product)
+            else:
+                print(f"      🚫 Filtered out unrelated product: {target_title[:50]}...")
+
+        return valid_products
 
     def _search_target_products_intelligently(self, amazon_product: Dict, base_search_term: str = "", max_results: int = 5) -> List[Dict]:
         """
         Search Target products using intelligent queries based on Amazon product data.
-        
+
         Args:
             amazon_product: Amazon product data to use for creating search queries
-            base_search_term: Original search term (e.g., "gaming chair") 
+            base_search_term: Original search term (e.g., "gaming chair")
             max_results: Maximum number of results to return
-            
+
         Returns:
             List of Target product dictionaries
         """
         print(f"🧠 Using intelligent Target search based on Amazon product data...")
-        
+
         # Get prioritized search queries
         search_queries = self._create_intelligent_target_search_query(amazon_product, base_search_term)
-        
+
         if not search_queries:
             print("❌ No valid search queries generated")
             return []
-        
+
         all_products = []
-        
+
         # Try each search query in order of precision
         for i, query in enumerate(search_queries, 1):
             print(f"\n   📋 Trying search strategy {i}/{len(search_queries)}: '{query[:80]}...'")
-            
+
             try:
                 # Use existing Target search method
                 products = self._search_target_products(query, max_results)
-                
+
                 if products:
-                    print(f"   ✅ Found {len(products)} products with this strategy")
-                    all_products.extend(products)
-                    
-                    # If we found products with UPC search, those are likely perfect matches
+                    # For UPC search, validate that results are not just random data
                     if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
-                        print("   🎯 UPC search successful - using these results as high-confidence matches")
-                        break
-                    
+                        # Check if products are actually related to UPC search
+                        valid_products = self._validate_upc_search_results(products, query, amazon_product)
+                        if valid_products:
+                            print(f"   ✅ Found {len(valid_products)} valid UPC-matched products")
+                            all_products.extend(valid_products)
+                            print("   🎯 UPC search successful - using these results as high-confidence matches")
+                            break
+                        else:
+                            print(f"   🎯 UPC '{query}' search returned unrelated products - trying next strategy...")
+                            continue
+                    else:
+                        print(f"   ✅ Found {len(products)} products with this strategy")
+                        all_products.extend(products)
+
                     # If we have enough products, we can stop
                     if len(all_products) >= max_results:
                         break
                 else:
                     print(f"   ❌ No products found with strategy {i}")
-                    
+                    # For UPC search, try next strategy instead
+                    if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
+                        print(f"   🎯 UPC '{query}' not found on Target - trying next strategy...")
+
             except Exception as e:
                 print(f"   ⚠️ Error with strategy {i}: {str(e)}")
+                # For UPC search, try next strategy instead
+                if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
+                    print(f"   🎯 UPC search failed - trying next strategy...")
                 continue
-        
+
         # Remove duplicates while preserving order
         unique_products = []
         seen_tcins = set()
-        
+
         for product in all_products:
             tcin = product.get('basic_info', {}).get('tcin') or product.get('tcin', '')
             if tcin and tcin not in seen_tcins:
                 seen_tcins.add(tcin)
                 unique_products.append(product)
-        
+
         # Limit to max_results
         final_products = unique_products[:max_results]
-        
+
         print(f"\n   📊 Final result: {len(final_products)} unique products found")
-        
+
         return final_products
 
     def run_complete_matching_workflow(self, search_term: str, max_results: int = 5) -> List[MatchingResult]:
@@ -1440,42 +1792,28 @@ class ProductMatchingSystem:
         target_products = self._search_target_products_intelligently(amazon_product, target_search_term, max_target_results)
 
         if not target_products:
-            print("❌ No Target products found (neither live search nor sample data).")
+            print("❌ No Target products found.")
             return []
 
-        # Check if we're using sample data (indicated by loading from existing files vs live search)
-        is_using_samples = not TARGET_SEARCH_AVAILABLE or not hasattr(self, 'target_searcher') or self.target_searcher is None
-        if is_using_samples:
-            print(f"📦 Using {len(target_products)} sample Target products for demonstration")
-            print("💡 Note: These are pre-downloaded products for testing the matching algorithm")
-        else:
-            print(f"✅ Found {len(target_products)} live Target product(s)")
+        print(f"✅ Found {len(target_products)} live Target product(s)")
 
         # Step 3: Fetch detailed Target product information
         print(f"\n📊 Step 3: Fetching detailed Target product information...")
         detailed_target_products = []
 
         for i, product in enumerate(target_products, 1):
-            # If using sample data, the product might already be detailed
-            if is_using_samples:
-                print(f"   📋 Loading sample Target product {i}/{len(target_products)}...")
-                # For sample data, we need to load the full product details from file
-                detailed_product = self._load_sample_target_product_details(product)
-                if detailed_product:
-                    detailed_target_products.append(detailed_product)
-            else:
-                # For live search results, fetch details from Target URL
-                product_url = product.get('product_url')
-                if not product_url:
-                    continue
+            # For live search results, fetch details from Target URL
+            product_url = product.get('product_url')
+            if not product_url:
+                continue
 
-                print(f"   📋 Fetching Target product details {i}/{len(target_products)}...")
-                detailed_product = self._fetch_target_product_details(product_url)
+            print(f"   📋 Fetching Target product details {i}/{len(target_products)}...")
+            detailed_product = self._fetch_target_product_details(product_url)
 
-                if detailed_product and 'error' not in detailed_product:
-                    detailed_target_products.append(detailed_product)
+            if detailed_product and 'error' not in detailed_product:
+                detailed_target_products.append(detailed_product)
 
-                time.sleep(2)  # Rate limiting for live requests
+            time.sleep(2)  # Rate limiting for live requests
 
         print(f"✅ Successfully loaded details for {len(detailed_target_products)} Target product(s)")
 
@@ -1551,6 +1889,15 @@ class ProductMatchingSystem:
             # Use existing Amazon extractor
             detailed_product = self.amazon_extractor.extract_product(asin)
 
+            # Better error handling for different response types
+            if detailed_product is None:
+                print(f"❌ Amazon extractor returned None for ASIN: {asin}")
+                return None
+                
+            if not isinstance(detailed_product, dict):
+                print(f"❌ Amazon extractor returned invalid type: {type(detailed_product)}")
+                return None
+
             if 'error' in detailed_product:
                 print(f"❌ Error extracting product: {detailed_product['error']}")
                 return None
@@ -1597,10 +1944,14 @@ class ProductMatchingSystem:
         filename = f"url_matching_report_{target_search_term.replace(' ', '_')}_{timestamp}.json"
         filepath = self.results_dir / filename
 
-        # Prepare report data
+        # Prepare report data with enhanced pricing information
         amazon_product = results[0].amazon_product if results else {}
         amazon_asin = amazon_product.get('asin', '')
         amazon_price = self._extract_amazon_price(amazon_product)
+
+        # Extract detailed pricing information for the report
+        pricing_info = amazon_product.get('pricing', {})
+        search_enhancement = amazon_product.get('search_enhancement', {})
 
         report_data = {
             'matching_type': 'amazon_url_vs_target_search',
@@ -1613,7 +1964,21 @@ class ProductMatchingSystem:
                 'asin': amazon_asin,
                 'brand': amazon_product.get('brand', ''),
                 'price': amazon_price,
-                'url': self._build_amazon_url(amazon_asin)
+                'url': self._build_amazon_url(amazon_asin),
+                # Enhanced pricing details with search-based pricing
+                'pricing_details': {
+                    'detail_page_price': pricing_info.get('current_price', ''),
+                    'search_current_price': pricing_info.get('search_current_price', pricing_info.get('formatted_current_price', '')),
+                    'list_price': pricing_info.get('list_price', ''),
+                    'search_list_price': pricing_info.get('search_list_price', ''),
+                    'more_buying_choices': pricing_info.get('more_buying_choices', {}),
+                    'coupon_info': pricing_info.get('coupon_info', ''),
+                    'was_price': pricing_info.get('was_price', ''),
+                    'price_source': 'search_enhanced' if pricing_info.get('search_current_price') else 'detail_page',
+                    'search_enhancement_status': search_enhancement.get('pricing_enhanced', False)
+                },
+                # Marketplace data (already enhanced with search pricing)
+                'marketplace_info': self._extract_amazon_marketplace_info(amazon_product)
             },
             'summary': {
                 'unique_target_products': len(set(r.target_product.get('basic_info', {}).get('tcin', '') for r in results)),
@@ -1658,10 +2023,60 @@ class ProductMatchingSystem:
 
         if results:
             best_match = results[0]
+            amazon_product = best_match.amazon_product
+
             print(f"\n🏆 BEST MATCH:")
-            print(f"   Amazon: {best_match.amazon_product.get('title', '')[:70]}...")
+            print(f"   Amazon: {amazon_product.get('title', '')[:70]}...")
             print(f"   Target: {best_match.target_product.get('basic_info', {}).get('name', '')[:70]}...")
             print(f"   Score: {best_match.match_score:.1f} ({best_match.confidence})")
+
+            # Show enhanced pricing information
+            pricing_details = report_data['amazon_product']['pricing_details']
+            print(f"\n💰 SEARCH-ENHANCED PRICING:")
+
+            if pricing_details['search_current_price']:
+                print(f"   🔍 Search Current Price: {pricing_details['search_current_price']}")
+                if pricing_details['search_list_price']:
+                    print(f"   🏷️ Search List Price: {pricing_details['search_list_price']}")
+
+                # Show format you requested
+                current = pricing_details['search_current_price']
+                list_p = pricing_details['search_list_price']
+                if current and list_p:
+                    print(f"   📊 Your Format: {current} List: {list_p}")
+
+                more_choices = pricing_details.get('more_buying_choices', {})
+                if isinstance(more_choices, dict) and more_choices.get('text'):
+                    print(f"   🛒 More Buying Choices: {more_choices['text']}")
+                elif more_choices and isinstance(more_choices, str):
+                    print(f"   🛒 More Buying Choices: {more_choices}")
+
+            if pricing_details['detail_page_price']:
+                print(f"   📄 Detail Page Price: {pricing_details['detail_page_price']}")
+
+            print(f"   📈 Price Source: {pricing_details['price_source']}")
+            print(f"   ✅ Search Enhanced: {'Yes' if pricing_details['search_enhancement_status'] else 'No'}")
+
+            # Show enhanced seller and shipment information
+            marketplace_info = report_data['amazon_product']['marketplace_info']
+            enhanced_fulfillment = marketplace_info.get('enhanced_fulfillment', {})
+
+            if enhanced_fulfillment and any([enhanced_fulfillment.get('seller_name'), enhanced_fulfillment.get('shipped_by')]):
+                print(f"\n🚚 SELLER & SHIPMENT INFO:")
+
+                if enhanced_fulfillment.get('seller_name'):
+                    print(f"   🏪 Sold by: {enhanced_fulfillment['seller_name']}")
+
+                if enhanced_fulfillment.get('shipped_by'):
+                    print(f"   📦 Shipped by: {enhanced_fulfillment['shipped_by']}")
+
+                if enhanced_fulfillment.get('shipment_type'):
+                    print(f"   🚛 Shipment type: {enhanced_fulfillment['shipment_type']}")
+
+                # Show extracted patterns for debugging
+                patterns = enhanced_fulfillment.get('extracted_patterns', [])
+                if patterns:
+                    print(f"   🔍 Extracted from text: '{patterns[0].get('text', '')}'")
 
             print("\n   📊 Score breakdown:")
             for category, score in best_match.score_breakdown.items():
@@ -1697,125 +2112,46 @@ class ProductMatchingSystem:
             return []
 
     def _search_target_products(self, search_term: str, max_results: int = 5) -> List[Dict]:
-        """Search Target for products with improved error handling"""
+        """Search Target for products - live search only, no fallbacks"""
         try:
             if not TARGET_SEARCH_AVAILABLE:
-                print("⚠️  Target search not available.")
-                return self._get_sample_target_products(search_term, max_results)
+                print("❌ Target search not available.")
+                return []
 
             if not hasattr(self, 'target_searcher') or self.target_searcher is None:
-                print("⚠️  Target searcher not initialized.")
-                return self._get_sample_target_products(search_term, max_results)
+                print("❌ Target searcher not initialized.")
+                return []
 
-            print(f"🔍 Attempting Target search for '{search_term}'...")
+            print(f"🔍 Searching Target for '{search_term}'...")
 
             # Search Target with timeout handling
-            try:
-                products = self.target_searcher.search_and_extract(search_term, max_results)
+            products = self.target_searcher.search_and_extract(search_term, max_results)
 
-                if not products:
-                    print("   📦 No products found in Target search.")
-                    return self._get_sample_target_products(search_term, max_results)
+            if not products:
+                print("   ❌ No products found in Target search.")
+                return []
 
-                print(f"   ✅ Found {len(products)} Target products")
+            print(f"   ✅ Found {len(products)} Target products")
 
-                # Convert to dict format
-                product_dicts = []
-                for product in products:
-                    product_dict = {
-                        'tcin': product.tcin,
-                        'title': product.title,
-                        'price': product.price,
-                        'original_price': product.original_price,
-                        'brand': product.brand,
-                        'product_url': product.product_url,
-                        'availability': product.availability
-                    }
-                    product_dicts.append(product_dict)
+            # Convert to dict format
+            product_dicts = []
+            for product in products:
+                product_dict = {
+                    'tcin': product.tcin,
+                    'title': product.title,
+                    'price': product.price,
+                    'original_price': product.original_price,
+                    'brand': product.brand,
+                    'product_url': product.product_url,
+                    'availability': product.availability
+                }
+                product_dicts.append(product_dict)
 
-                return product_dicts
-
-            except Exception as search_error:
-                error_msg = str(search_error).lower()
-                if 'timeout' in error_msg or 'connection' in error_msg:
-                    print(f"   ⏱️  Target search timed out. Using sample data for demonstration.")
-                    return self._get_sample_target_products(search_term, max_results)
-                else:
-                    print(f"   ❌ Target search error: {str(search_error)}")
-                    print(f"   � Using sample data as fallback.")
-                    return self._get_sample_target_products(search_term, max_results)
+            return product_dicts
 
         except Exception as e:
-            print(f"   ❌ Error in Target search setup: {str(e)}")
-            print(f"   📦 Using sample data as fallback.")
-            return self._get_sample_target_products(search_term, max_results)
-
-    def _get_sample_target_products(self, search_term: str, max_results: int = 5) -> List[Dict]:
-        """Get sample Target products based on search term for demo purposes"""
-        print(f"   📦 Loading sample Target products for '{search_term}'...")
-
-        # Check if we have existing target product files
-        target_files = list(Path(".").glob("target_product_*.json"))
-
-        if target_files:
-            products = []
-            for file_path in target_files[:max_results]:
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        product_data = json.load(f)
-
-                    # Extract TCIN from filename for consistency
-                    filename = file_path.name
-                    tcin_match = re.search(r'target_product_(\d+)_', filename)
-                    tcin = tcin_match.group(1) if tcin_match else product_data.get('basic_info', {}).get('tcin', '')
-
-                    # Extract basic info for matching
-                    product_dict = {
-                        'tcin': tcin,
-                        'title': product_data.get('basic_info', {}).get('name', ''),
-                        'price': product_data.get('pricing', {}).get('current_price', ''),
-                        'original_price': product_data.get('pricing', {}).get('regular_price', ''),
-                        'brand': product_data.get('basic_info', {}).get('brand', ''),
-                        'product_url': product_data.get('basic_info', {}).get('url', ''),
-                        'availability': 'Available'
-                    }
-                    products.append(product_dict)
-
-                except Exception as e:
-                    continue
-
-            if products:
-                print(f"   ✅ Loaded {len(products)} sample Target products from existing files")
-                return products
-
-        # If no files found, return empty list
-        print(f"   ❌ No sample Target product files found")
-        return []
-
-    def _load_sample_target_product_details(self, basic_product: Dict) -> Optional[Dict]:
-        """Load detailed product information from sample Target product files"""
-        tcin = basic_product.get('tcin', '')
-
-        if not tcin:
-            return None
-
-        # Try to find the corresponding detailed product file
-        target_files = list(Path(".").glob(f"target_product_{tcin}_*.json"))
-
-        if not target_files:
-            # Try without timestamp suffix
-            target_files = list(Path(".").glob(f"target_product_*{tcin}*.json"))
-
-        if target_files:
-            try:
-                with open(target_files[0], 'r', encoding='utf-8') as f:
-                    detailed_product = json.load(f)
-                return detailed_product
-            except Exception as e:
-                print(f"   ⚠️  Error loading sample product {tcin}: {e}")
-                return None
-
-        return None
+            print(f"   ❌ Target search error: {str(e)}")
+            return []
 
     def _fetch_target_product_details(self, product_url: str) -> Optional[Dict]:
         """Fetch detailed Target product information"""
@@ -1863,7 +2199,9 @@ class ProductMatchingSystem:
                     'asin': amazon_asin,
                     'brand': amazon_product.get('brand', ''),
                     'price': amazon_price,
-                    'url': self._build_amazon_url(amazon_asin)
+                    'url': self._build_amazon_url(amazon_asin),
+                    # NEW: Marketplace data
+                    'marketplace_info': self._extract_amazon_marketplace_info(amazon_product)
                 },
                 'target_product': {
                     'title': target_product.get('basic_info', {}).get('name', ''),
@@ -1893,10 +2231,68 @@ class ProductMatchingSystem:
 
         if results:
             best_match = results[0]
+            amazon_marketplace = self._extract_amazon_marketplace_info(best_match.amazon_product)
+
             print(f"\n🏆 BEST MATCH:")
             print(f"   Amazon: {best_match.amazon_product.get('title', '')[:60]}...")
             print(f"   Target: {best_match.target_product.get('basic_info', {}).get('name', '')[:60]}...")
             print(f"   Score: {best_match.match_score:.1f} ({best_match.confidence})")
+
+            # Display Amazon marketplace information
+            if amazon_marketplace:
+                print(f"\n📊 AMAZON MARKETPLACE INFO:")
+
+                # Sales rank
+                sales_rank = amazon_marketplace.get('sales_rank', {})
+                if sales_rank.get('primary_rank'):
+                    print(f"   📈 Sales Rank: #{sales_rank['primary_rank']} in {sales_rank.get('primary_category', 'Unknown')}")
+
+                # Fulfillment
+                fulfillment = amazon_marketplace.get('fulfillment', {})
+                if fulfillment.get('type'):
+                    fulfillment_type = fulfillment['type']
+                    fulfillment_display = {
+                        'AMZ': '🏪 Amazon (AMZ)',
+                        'FBA': '📦 Fulfilled by Amazon (FBA)',
+                        'FBM': '🚚 Fulfilled by Merchant (FBM)'
+                    }.get(fulfillment_type, f"🔍 {fulfillment_type}")
+                    print(f"   🚚 Fulfillment: {fulfillment_display}")
+
+                    if fulfillment.get('sold_by'):
+                        print(f"   🏪 Sold by: {fulfillment['sold_by']}")
+
+                # Enhanced seller and shipment information
+                enhanced_fulfillment = amazon_marketplace.get('enhanced_fulfillment', {})
+                if enhanced_fulfillment and any([enhanced_fulfillment.get('seller_name'), enhanced_fulfillment.get('shipped_by')]):
+                    print(f"\n🚚 ENHANCED SELLER & SHIPMENT INFO:")
+
+                    if enhanced_fulfillment.get('seller_name'):
+                        print(f"   🏪 Sold by: {enhanced_fulfillment['seller_name']}")
+
+                    if enhanced_fulfillment.get('shipped_by'):
+                        print(f"   📦 Shipped by: {enhanced_fulfillment['shipped_by']}")
+
+                    if enhanced_fulfillment.get('shipment_type'):
+                        print(f"   🚛 Shipment type: {enhanced_fulfillment['shipment_type']}")
+
+                    # Show extracted patterns for debugging
+                    patterns = enhanced_fulfillment.get('extracted_patterns', [])
+                    if patterns:
+                        print(f"   🔍 Extracted from: '{patterns[0].get('text', '')}'")
+
+                # Pack size
+                pack_size = amazon_marketplace.get('pack_size', {})
+                if pack_size.get('size') and pack_size['size'] > 1:
+                    print(f"   📦 Pack Size: {pack_size['size']} units")
+
+                # Pricing details
+                pricing = amazon_marketplace.get('pricing', {})
+                if pricing.get('buybox_price'):
+                    print(f"   💰 Buy Box Price: {pricing['buybox_price']}")
+                if pricing.get('list_price') and pricing['list_price'] != pricing.get('buybox_price'):
+                    print(f"   💵 List Price: {pricing['list_price']}")
+                if pricing.get('discount'):
+                    print(f"   💸 Discount: {pricing['discount']}")
 
             print("\n   📊 Score breakdown:")
             for category, score in best_match.score_breakdown.items():
@@ -1909,6 +2305,9 @@ class ProductMatchingSystem:
                     amazon_title = result.amazon_product.get('title', '')[:40]
                     target_title = result.target_product.get('basic_info', {}).get('name', '')[:40]
                     print(f"   {i}. Score: {result.match_score:.1f} | Amazon: {amazon_title}... | Target: {target_title}...")
+
+        print(f"\n🕐 Report generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 80)
 
 
 def main():

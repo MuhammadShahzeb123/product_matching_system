@@ -1,0 +1,591 @@
+{
+  "basic_info": {
+    "tcin": "90477486",
+    "name": "RTIC Outdoors 32 QT Ultra-Light Hard Sided Cooler",
+    "brand": "RTIC Outdoors",
+    "brand_url": "/b/rtic-outdoors/-/N-q643len2o5d",
+    "model_number": "90477486",
+    "manufacturer": "RTIC Outdoors",
+    "upc": "840008247294",
+    "gtin": "840008247294",
+    "asin_equivalent": "90477486",
+    "total_specifications": 2,
+    "extraction_timestamp": "2025-07-26T00:46:51.108673"
+  },
+  "pricing": {
+    "formatted_current_price": "$159.99",
+    "price_type": "reg",
+    "location_id": 3991
+  },
+  "physical_attributes": {
+    "detailed_dimensions": {
+      "Dimensions (Overall)": "14.5 Inches (H) x 23 Inches (W) x 14.5 Inches (D)",
+      "Weight": "15.9 Pounds"
+    }
+  },
+  "product_details": {
+    "materials": [
+      "Liner Material: Polypropylene",
+      "Material: Polypropylene"
+    ],
+    "care_instructions": [
+      "Care & Cleaning: Wash With Soap and Water"
+    ],
+    "product_type": "SPORTING GOODS",
+    "product_type_id": 543,
+    "purchase_behavior": "Discretionary",
+    "import_designation": "Made in the USA or Imported"
+  },
+  "images": {
+    "base_url": "//target.scene7.com/is/image/Target/",
+    "primary_image": {
+      "url": "https://target.scene7.com/is/image/Target/GUEST_b389728f-3728-4a64-a781-653ee0504079",
+      "name": "GUEST_b389728f-3728-4a64-a781-653ee0504079"
+    },
+    "swatch_image": {
+      "url": "https://target.scene7.com/is/image/Target/baseswatch?color=116,122,133",
+      "name": "baseswatch?color=116,122,133"
+    },
+    "alternate_images": [
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_84e31456-5c66-4462-8d12-3c651ef57c92",
+        "name": "GUEST_84e31456-5c66-4462-8d12-3c651ef57c92"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_b6b2c7db-4d78-4cb6-b587-7fff78e6bf14",
+        "name": "GUEST_b6b2c7db-4d78-4cb6-b587-7fff78e6bf14"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_aac9e0f9-f7e7-4e2c-96ed-b3681e6ea1ff",
+        "name": "GUEST_aac9e0f9-f7e7-4e2c-96ed-b3681e6ea1ff"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_b98135f9-9f6c-4c65-89fa-9cd9f8d45777",
+        "name": "GUEST_b98135f9-9f6c-4c65-89fa-9cd9f8d45777"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_3ee586d1-7b01-49dc-8c4d-2f27f9353ba0",
+        "name": "GUEST_3ee586d1-7b01-49dc-8c4d-2f27f9353ba0"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_a2159b5b-0b02-47d8-8e83-09a6d7182aac",
+        "name": "GUEST_a2159b5b-0b02-47d8-8e83-09a6d7182aac"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_249fbae3-2f5b-4ab9-966c-00b1a3955bfd",
+        "name": "GUEST_249fbae3-2f5b-4ab9-966c-00b1a3955bfd"
+      },
+      {
+        "url": "https://target.scene7.com/is/image/Target/GUEST_52192910-83e5-44b9-85b1-0734b0b84f94",
+        "name": "GUEST_52192910-83e5-44b9-85b1-0734b0b84f94"
+      }
+    ],
+    "content_labels": [
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_b389728f-3728-4a64-a781-653ee0504079"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_84e31456-5c66-4462-8d12-3c651ef57c92"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/baseswatch?color=116,122,133"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_a2159b5b-0b02-47d8-8e83-09a6d7182aac"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_b98135f9-9f6c-4c65-89fa-9cd9f8d45777"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_249fbae3-2f5b-4ab9-966c-00b1a3955bfd"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_3ee586d1-7b01-49dc-8c4d-2f27f9353ba0"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_b6b2c7db-4d78-4cb6-b587-7fff78e6bf14"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_aac9e0f9-f7e7-4e2c-96ed-b3681e6ea1ff"
+      },
+      {
+        "image_url": "https://target.scene7.com/is/image/Target/GUEST_52192910-83e5-44b9-85b1-0734b0b84f94"
+      }
+    ]
+  },
+  "vendor_info": {},
+  "category_info": {
+    "department_name": "OUTDOOR RECREATION",
+    "department_id": 337,
+    "class_id": 1,
+    "category_name": "Camping Gear",
+    "parent_category_id": "5xt85",
+    "breadcrumbs": [
+      {
+        "canonical_url": "/",
+        "category_id": "root",
+        "name": "target"
+      },
+      {
+        "canonical_url": "/c/sports-outdoors/-/N-5xt85",
+        "category_id": "5xt85",
+        "name": "Sports & Outdoors"
+      },
+      {
+        "canonical_url": "/c/camping-outdoors-sports/-/N-5xt6e",
+        "category_id": "5xt6e",
+        "name": "Camping Gear"
+      }
+    ]
+  },
+  "reviews": {
+    "average_rating": 4.57,
+    "total_reviews": 1381,
+    "rating_distribution": {
+      "rating1": 64,
+      "rating2": 37,
+      "rating3": 69,
+      "rating4": 97,
+      "rating5": 1114
+    },
+    "recommended_count": 3,
+    "not_recommended_count": 6,
+    "recommended_percentage": 33,
+    "question_count": 1,
+    "has_verified_reviews": true,
+    "recent_reviews": [
+      {
+        "id": "8184af10-e473-4c03-9133-451d55e7bf39",
+        "text": "we actually had trouble with the website we intended to have our writing in purple and somehow it still came out in black. That’s the only disappointment we really had.",
+        "author": {
+          "nickname": "Stephanie C.",
+          "external_id": "d4288864-8487-56d4-999a-4c0f42c158e7"
+        },
+        "title": "we actually had trouble with",
+        "rating": {
+          "value": 4,
+          "submitted_at": "2025-07-21T15:32:08.000Z"
+        }
+      },
+      {
+        "id": "eec0eddb-8772-440a-8704-afc19de2d3bd",
+        "text": "This has been a game changer bc not so heavy and can fit through the doorway into our cabin without asking another person to assist. I also love the tray that sits inside to keep lettuce and veg from freezing. The softside cooler is perfect for picnics. I’d purchase everything again in a heartbeat. Order came timely and well packaged.",
+        "author": {
+          "nickname": "Clara L.",
+          "external_id": "edc0e8a2-7bbe-5b3c-9e34-abe5cbd84e7c"
+        },
+        "title": "Best coolers ever",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-19T17:04:53.000Z"
+        }
+      },
+      {
+        "id": "92ca721e-ad9e-4c90-86f9-36fc5e56aee9",
+        "text": "Love the cooler. It holds everything we needed and more. Ice lasted all weekend long.",
+        "author": {
+          "nickname": "Tonwel M.",
+          "external_id": "56291e5c-7e98-5000-8f24-68d26f91ff6e"
+        },
+        "title": "LOVE!!",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-17T18:12:42.000Z"
+        }
+      },
+      {
+        "id": "78bd0097-16e2-443c-8d2b-ef46389e002b",
+        "text": "Nice size and weight but ice stayed a day and a half only",
+        "author": {
+          "nickname": "Lou M.",
+          "external_id": "d034feb8-9e0f-566d-9f98-fcbcae3360d0"
+        },
+        "title": "Nice size and weight but",
+        "rating": {
+          "value": 3,
+          "submitted_at": "2025-07-17T15:20:05.000Z"
+        }
+      },
+      {
+        "id": "c1ec9978-8a62-4295-9734-6ab549dd45e2",
+        "text": "I bought this for my husbands birthday gift, he works outside all day every day so I knew having access to ice cold water was going to be very beneficial for him. This cooler was pre-chilled per the directions and sits inside of his truck not exposed to any sunlight. We put in 2 large bags of ice and within 2 days or less the ice has pretty much melted, so we are buying ice way more than what I thought this cooler was capable of. The cooler has sweated so much the entire time we’ve used it, it has soaked the backseat of my husbands truck. We’ve checked the drain plugs to ensure they are screwed on tight but it still sweats a lot. This has been a not so great first experience with a cooler but maybe we are doing something wrong? The good things about it is the size. It’s big enough to hold a good amount of drinks with ice. I like the color and the bottle opener can be useful too.",
+        "author": {
+          "nickname": "Stephanie H.",
+          "external_id": "cbc998fe-5253-5c08-9aa6-d795ce949117"
+        },
+        "title": "Not a great first time experience",
+        "rating": {
+          "value": 2,
+          "submitted_at": "2025-07-13T15:34:46.000Z"
+        }
+      },
+      {
+        "id": "bb088a83-06a5-41f8-86d7-ec660c1b1c2d",
+        "text": "Seems like a high quality cooler. Drains sweat so bad it’s like a leak. Hard to put in back of a truck with dry clothes.",
+        "author": {
+          "nickname": "Thomas R.",
+          "external_id": "7ec3403a-9a23-5d30-a7cf-e11b2027203a"
+        },
+        "title": "Seems like a high quality",
+        "rating": {
+          "value": 2,
+          "submitted_at": "2025-07-12T10:52:44.000Z"
+        }
+      },
+      {
+        "id": "11248d05-3bae-44fc-90ef-626c87e8177b",
+        "text": "Amazing. Took it camping in 80 degree weather, ice didn't melt for 6 hours. It was also in a car without a/c in 80 degree weather, so it was blisteringly hot, but the ice still didn't melt for several hours. No leak, lots of space, very durable. Held food for two people to last 3 days. Wasn't even completely full. A little heavy, but handles are nicely constructed so carrying isn't a terrible ordeal. Lid closes very effectively and very well sealed. Interesting construction with a \"rubber\" latch to create an airtight seal. It's nice that it doesn't need to be \"snapped\" shut, I feel like it's more accessible that way, and probably easier. Design is very nice, the blue color is very pleasing on the eyes.",
+        "author": {
+          "nickname": "Mina L.",
+          "external_id": "a93628e6-a11a-5052-af65-b428e8f8c02c"
+        },
+        "title": "Awesome, took it camping for 3 days",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-12T03:41:23.000Z"
+        }
+      },
+      {
+        "id": "a4b18f65-528f-401b-96da-2d03e3d87575",
+        "text": "I added two large reusable ice packs and froze the freezable food items before adding and without adding ice this kept my food cold over a 4 day camping trip! Fabulous design! I bought the divider and insert and made it even better for keeping dry food cool but not wet!",
+        "author": {
+          "nickname": "Family Stone",
+          "external_id": "34760354"
+        },
+        "title": "Great cooler!",
+        "rating": {
+          "value": 5,
+          "submitted_at": "2025-07-10T19:30:17.920Z"
+        }
+      }
+    ],
+    "review_photos": [
+      "https://target.scene7.com/is/image/Target/GUEST_9cab215d-8afb-458c-8cad-4f7d9ecfc152",
+      "https://target.scene7.com/is/image/Target/GUEST_3aed2dc9-92b3-481c-8d2a-bc4afc0667be",
+      "https://target.scene7.com/is/image/Target/GUEST_93f0f547-11e8-4094-81cf-421e7344f538",
+      "https://target.scene7.com/is/image/Target/GUEST_078e1b92-f350-4b0f-bb64-3354f974253f",
+      "https://target.scene7.com/is/image/Target/GUEST_36b6c5d8-e77e-4f74-9caf-21d59c653326",
+      "https://target.scene7.com/is/image/Target/GUEST_9d61aba3-147d-4454-86b0-5fcbbd5e653d",
+      "https://target.scene7.com/is/image/Target/GUEST_7488fbd1-afed-4875-8da2-5a0a51a523a2",
+      "https://target.scene7.com/is/image/Target/GUEST_32bea4a9-6474-4a91-9844-f5951adf590b",
+      "https://target.scene7.com/is/image/Target/GUEST_fb9613d4-3406-400b-9376-3e89c6c15551",
+      "https://target.scene7.com/is/image/Target/GUEST_2bd78ad2-65e1-433d-ba37-20bcea848c19",
+      "https://target.scene7.com/is/image/Target/GUEST_23e2b21c-a8e8-4470-81ac-710c161c07d7",
+      "https://target.scene7.com/is/image/Target/GUEST_7bd10c6d-440f-4f20-95c6-3ca5e23cb79e"
+    ]
+  },
+  "fulfillment": {
+    "return_policies": [
+      {
+        "user_type": "best_guest",
+        "day_count": 120
+      },
+      {
+        "user_type": "regular_guest",
+        "day_count": 90
+      }
+    ]
+  },
+  "variations": {
+    "child_products": [
+      {
+        "tcin": "89973450",
+        "primary_barcode": "840008247294",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "89973450-3991-159.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "89292764",
+        "primary_barcode": "840008258153",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "89292764-3991-159.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "89973465",
+        "primary_barcode": "840008244064",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "89973465-3991-159.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "89973437",
+        "primary_barcode": "840008244071",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "89973437-3991-159.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "89973472",
+        "primary_barcode": "840008258177",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "89973472-3991-159.99-2025072500"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "92084342",
+        "primary_barcode": "840008267612",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "92084342-3991-159.99-2025072408"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      },
+      {
+        "tcin": "92281888",
+        "primary_barcode": "840008267650",
+        "price": {
+          "current_retail": 159.99,
+          "display_was_now": false,
+          "formatted_current_price": "$159.99",
+          "formatted_current_price_type": "reg",
+          "reg_retail": 159.99,
+          "location_id": 3991,
+          "external_system_id": "92281888-3991-159.99-2025072408"
+        },
+        "esp_protection": {
+          "tcin": "54573664",
+          "enrichment": {
+            "images": {
+              "base_url": "//target.scene7.com/is/image/Target/",
+              "primary_image_url": "https://target.scene7.com/is/image/Target/GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4",
+              "primary_image": "GUEST_d51c00e5-0638-4284-bbb4-c06cb6ded0c4"
+            }
+          },
+          "price": {
+            "formatted_current_price": "$25.00",
+            "formatted_current_price_type": "reg"
+          },
+          "product_description": {
+            "title": "2 Year Furniture Protection Plan ($150-$199.99) - Allstate",
+            "bullet_descriptions": [
+              "<B>Benefits:</B> Free 2-Way Shipping, 24/7 Support, No Deductible, No Additional Cost",
+              "<B>Support:</B> Online, Phone",
+              "<B>Includes:</B> Mechanical Defects, Normal Wear and Tear Coverage, Electrical Defects",
+              "<B>Minimum Qualifying Item Price:</B> 150",
+              "<B>Maximum Qualifying Item Price:</B> 199.99",
+              "<B>Service plan type:</B> Allstate - Furniture",
+              "<B>Number of years protected:</B> 2 years"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "enrichment_data": {
+    "activation_date": "2020-12-01T08:00Z",
+    "open_graph": {
+      "title": "RTIC Outdoors 32 QT Ultra-Light Hard Sided Cooler - Gray: Compact Outdoor Beverage Storage",
+      "type": "product",
+      "image": "https://target.scene7.com/is/image/Target/GUEST_b5e304fa-2967-4eaf-b5fc-97eae5b986ab",
+      "url": "/p/rtic-outdoors-ultra-light-32qt-hard-sided-cooler-gray/-/A-89292764",
+      "description": "Read reviews and buy RTIC Outdoors 32 QT Ultra-Light Hard Sided Cooler - Gray: Compact Outdoor Beverage Storage at Target. Choose from contactless Same Day Delivery, Drive Up and more."
+    },
+    "twitter_card": {
+      "title": "RTIC Outdoors 32 QT Ultra-Light Hard Sided Cooler - Gray: Compact Outdoor Beverage Storage",
+      "card": "summary_large_image",
+      "url": "/p/rtic-outdoors-ultra-light-32qt-hard-sided-cooler-gray/-/A-89292764",
+      "imageUrl": "https://target.scene7.com/is/image/Target/GUEST_b5e304fa-2967-4eaf-b5fc-97eae5b986ab",
+      "description": "Read reviews and buy RTIC Outdoors 32 QT Ultra-Light Hard Sided Cooler - Gray: Compact Outdoor Beverage Storage at Target. Choose from contactless Same Day Delivery, Drive Up and more."
+    }
+  },
+  "technical_specs": {
+    "specifications": {
+      "Capacity (Volume)": "32 Quart",
+      "Number of Beverage Cans Held": "48"
+    }
+  },
+  "compatibility": {},
+  "raw_data_sources": []
+}
