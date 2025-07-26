@@ -1,0 +1,50 @@
+{
+  "search_type": "basic_search",
+  "search_term": "bluetooth speaker",
+  "timestamp": "20250726_151156",
+  "total_products": 3,
+  "products": [
+    {
+      "tcin": "1004385292",
+      "title": "Skullcandy Ounce Wireless Bluetooth Speaker - IPX7 Waterproof Mini Portable Speaker with 16 Hour Battery and Ballistic Nylon Carry Strap",
+      "price": "$29.99",
+      "original_price": "$49.99",
+      "brand": "",
+      "product_url": "https://www.target.com/p/skullcandy-ounce-wireless-bluetooth-speaker-ipx7-waterproof-mini-portable-speaker-with-16-hour-battery-and-ballistic-nylon-carry-strap/-/A-1004385292",
+      "availability": "Limited Availability",
+      "image_url": null,
+      "rating": null,
+      "review_count": null,
+      "search_term": "bluetooth speaker",
+      "search_timestamp": "2025-07-26T15:11:56.553244"
+    },
+    {
+      "tcin": "1004414723",
+      "title": "Skullcandy Ounce+ Wireless Bluetooth Speaker - IPX7 Waterproof with 16 Hour Battery, True Wireless Stereo, and Ballistic Nylon Carry Strap",
+      "price": "$29.99",
+      "original_price": "$49.99",
+      "brand": "",
+      "product_url": "https://www.target.com/p/skullcandy-ounce-wireless-bluetooth-speaker-ipx7-waterproof-with-16-hour-battery-true-wireless-stereo-and-ballistic-nylon-carry-strap/-/A-1004414723",
+      "availability": "Limited Availability",
+      "image_url": null,
+      "rating": null,
+      "review_count": null,
+      "search_term": "bluetooth speaker",
+      "search_timestamp": "2025-07-26T15:11:56.553263"
+    },
+    {
+      "tcin": "91652404",
+      "title": "PHILIPS Water-Resistant Bluetooth Speaker, Compact Design, Built-in Microphone White",
+      "price": "$19.99",
+      "original_price": "$29.99",
+      "brand": "",
+      "product_url": "https://www.target.com/p/philips-portable-bluetooth-speaker-ipx7-water-resistant-compact-design-built-in-microphone-white/-/A-91652404",
+      "availability": "Limited Availability",
+      "image_url": null,
+      "rating": null,
+      "review_count": null,
+      "search_term": "bluetooth speaker",
+      "search_timestamp": "2025-07-26T15:11:56.553272"
+    }
+  ]
+}

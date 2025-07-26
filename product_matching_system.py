@@ -46,21 +46,17 @@ except ImportError:
 from amazon_complete_fetcher_parser import AmazonProductExtractor
 from target_complete_fetcher_parser import TargetProductExtractor
 
+# Import new Target search scraper module
+from target_search_scraper import TargetSearchScraper
+
 # Try to import Amazon search capabilities
 try:
     from unneeded.realtime_amazon_extractor import RealTimeAmazonExtractor
     AMAZON_SEARCH_AVAILABLE = True
 except ImportError:
+    RealTimeAmazonExtractor = None
     AMAZON_SEARCH_AVAILABLE = False
     print("⚠️  Amazon search module not available. Will work with ASIN only.")
-
-# Try to import Target search capabilities
-try:
-    from unneeded.dynamic_target_scraper import TargetScraper
-    TARGET_SEARCH_AVAILABLE = True
-except ImportError:
-    TARGET_SEARCH_AVAILABLE = False
-    print("⚠️  Target search module not available. Will work with URLs only.")
 
 
 @dataclass
@@ -1010,40 +1006,15 @@ class ProductMatchingSystem:
         self.scorer = ProductMatchingScorer()
 
         # Initialize search modules if available
-        if AMAZON_SEARCH_AVAILABLE:
+        if AMAZON_SEARCH_AVAILABLE and RealTimeAmazonExtractor is not None:
             self.amazon_searcher = RealTimeAmazonExtractor(self.proxy_config)
 
-        if TARGET_SEARCH_AVAILABLE:
-            # Try to initialize Target scraper with better error handling
-            self.target_searcher = self._initialize_target_scraper()
+        # Initialize new Target search scraper
+        self.target_scraper = TargetSearchScraper(proxy_config=self.proxy_config)
 
         # Results storage
         self.results_dir = Path("matching_results")
         self.results_dir.mkdir(exist_ok=True)
-
-    def _initialize_target_scraper(self) -> Optional['TargetScraper']:
-        """Initialize Target scraper with fallback options"""
-        try:
-            # Try primary proxy
-            scraper = TargetScraper(
-                proxy=self.proxy_config.get('url'),
-                use_proxy=True
-            )
-            return scraper
-        except Exception as e:
-            print(f"⚠️  Failed to initialize Target scraper with primary proxy: {e}")
-
-            # Try without proxy as fallback
-            try:
-                scraper = TargetScraper(
-                    proxy=None,
-                    use_proxy=False
-                )
-                print("✅ Initialized Target scraper without proxy")
-                return scraper
-            except Exception as e2:
-                print(f"❌ Failed to initialize Target scraper without proxy: {e2}")
-                return None
 
     def _build_amazon_url(self, asin: str) -> str:
         """Build Amazon product URL from ASIN"""
@@ -1132,7 +1103,7 @@ class ProductMatchingSystem:
 
         # Multiple possible sources of seller/shipment text - convert all to strings safely
         text_sources = []
-        
+
         # List of paths to check for seller/shipment info
         source_paths = [
             ('fulfillment_text', amazon_product.get('fulfillment_text', '')),
@@ -1147,13 +1118,13 @@ class ProductMatchingSystem:
             ('details.seller_info', amazon_product.get('details', {}).get('seller_info', '')),
             ('specifications.seller_info', amazon_product.get('specifications', {}).get('seller_info', '')),
         ]
-        
+
         # Also check in raw HTML or description if available
         if 'raw_html' in amazon_product:
             source_paths.append(('raw_html', amazon_product.get('raw_html', '')))
         if 'description' in amazon_product:
             source_paths.append(('description', amazon_product.get('description', '')))
-        
+
         # Convert all sources to strings safely
         for source_name, source_value in source_paths:
             try:
@@ -1163,7 +1134,7 @@ class ProductMatchingSystem:
                         text_str = str(source_value)
                     else:
                         text_str = str(source_value).strip()
-                    
+
                     # Only add non-empty meaningful text
                     if text_str and text_str not in ['{}', '[]', 'None', 'null']:
                         text_sources.append(text_str)
@@ -1189,7 +1160,7 @@ class ProductMatchingSystem:
             # Text is already converted to string and validated
             if not text or len(text.strip()) == 0:
                 continue
-                
+
             # Skip obvious non-useful text
             clean_text = text.strip().lower()
             if clean_text in ['none', 'null', '{}', '[]', '""', "''", 'undefined']:
@@ -1410,157 +1381,6 @@ class ProductMatchingSystem:
 
         return ""
 
-    def _create_intelligent_target_search_query(self, amazon_product: Dict, base_search_term: str = "") -> List[str]:
-        """
-        Create intelligent Target search queries based on Amazon product data.
-
-        Enhanced Strategy:
-        1. First try UPC/barcode search (most precise - exact product match)
-        2. Try Amazon product title + brand search (high precision)
-        3. Try brand only search (fallback)
-        4. Try base search term (final fallback)
-
-        Args:
-            amazon_product: Amazon product data dictionary
-            base_search_term: Original search term (e.g., "spoon set")
-
-        Returns:
-            List of search queries ordered by precision (best first)
-        """
-        search_queries = []
-
-        # Strategy 1: UPC/Barcode search (highest precision - exact product match)
-        print("   🎯 Strategy 1: Searching for UPC/Barcode...")
-        upc_paths = [
-            'specifications.UPC',
-            'specifications.GTIN',
-            'specifications.EAN',
-            'specifications.Global Trade Identification Number',
-            'specifications.European Article Number',
-            'matching_data.barcode',
-            'barcode',
-            'gtin',
-            'upc'
-        ]
-
-        for path in upc_paths:
-            try:
-                keys = path.split('.')
-                value = amazon_product
-                for key in keys:
-                    if isinstance(value, dict) and key in value:
-                        value = value[key]
-                    else:
-                        value = None
-                        break
-
-                if value and str(value).strip() and len(str(value).strip()) >= 10:
-                    upc = str(value).strip()
-                    # Clean UPC - remove any special characters and keep only digits
-                    clean_upc = ''.join(filter(str.isdigit, upc))
-                    # Validate UPC format (should be numeric and of appropriate length)
-                    if clean_upc and len(clean_upc) in [10, 11, 12, 13, 14]:
-                        search_queries.append(clean_upc)
-                        print(f"      ✅ Found UPC/Barcode: '{clean_upc}' (cleaned from '{upc}')")
-                        break
-            except:
-                continue
-
-        # Strategy 2: Title + Brand search (when UPC not found)
-        print("   🎯 Strategy 2: Title + Brand search...")
-
-        # Extract Amazon product title
-        amazon_title = amazon_product.get('title', '').strip()
-
-        # Extract brand
-        brand = amazon_product.get('brand', '').strip() or amazon_product.get('specifications', {}).get('Brand Name', '').strip()
-
-        if amazon_title:
-            if brand:
-                query = f"{amazon_title} {brand}"
-                search_queries.append(query)
-                print(f"      ✅ Title + Brand: '{query[:80]}...'")
-            else:
-                # If no brand, just use title
-                search_queries.append(amazon_title)
-                print(f"      ✅ Title only: '{amazon_title[:80]}...'")
-
-        # Strategy 3: Brand only (fallback)
-        if brand and brand not in [q for q in search_queries]:
-            search_queries.append(brand)
-            print(f"      ✅ Brand fallback: '{brand}'")
-
-        # Strategy 4: Base search term (final fallback)
-        if base_search_term and base_search_term not in search_queries:
-            search_queries.append(base_search_term)
-            print(f"      ✅ Base term fallback: '{base_search_term}'")
-
-        print(f"   📊 Generated {len(search_queries)} search strategies")
-        return search_queries
-
-    def _validate_upc_search_results(self, products: List[Dict], upc_query: str, amazon_product: Dict) -> List[Dict]:
-        """
-        Validate that UPC search results are actually related to the Amazon product.
-        This prevents matching completely unrelated products when Target's UPC search
-        falls back to sample data.
-        """
-        if not products:
-            return []
-
-        # Extract key terms from Amazon product for validation
-        amazon_title = amazon_product.get('title', '').lower()
-        amazon_brand = (amazon_product.get('brand', '') or
-                       amazon_product.get('specifications', {}).get('Brand Name', '')).lower()
-        amazon_categories = amazon_product.get('categories', [])
-
-        # Get key words from Amazon product
-        amazon_keywords = set()
-        if amazon_title:
-            # Extract meaningful words (length > 3, not common words)
-            words = amazon_title.replace('-', ' ').split()
-            amazon_keywords.update([w for w in words if len(w) > 3 and
-                                  w not in ['with', 'that', 'this', 'will', 'have', 'from', 'they']])
-
-        if amazon_brand:
-            amazon_keywords.add(amazon_brand.strip())
-
-        # Add category keywords
-        for cat in amazon_categories:
-            if isinstance(cat, str):
-                amazon_keywords.add(cat.lower())
-
-        valid_products = []
-
-        for product in products:
-            # Extract Target product info
-            target_title = product.get('title', '').lower()
-            target_brand = product.get('brand', '').lower()
-
-            # Calculate keyword overlap
-            target_keywords = set()
-            if target_title:
-                words = target_title.replace('-', ' ').split()
-                target_keywords.update([w for w in words if len(w) > 3])
-
-            if target_brand:
-                target_keywords.add(target_brand.strip())
-
-            # Check for meaningful overlap
-            overlap = amazon_keywords.intersection(target_keywords)
-
-            # Consider valid if:
-            # 1. Brands match, OR
-            # 2. At least 2 meaningful keywords overlap, OR
-            # 3. Product types seem related (dishwasher vs kitchen, etc.)
-            if (amazon_brand and target_brand and amazon_brand == target_brand) or \
-               (len(overlap) >= 2) or \
-               (any(keyword in target_title for keyword in ['dishwasher', 'kitchen', 'appliance'] if 'dishwasher' in amazon_title)):
-                valid_products.append(product)
-            else:
-                print(f"      🚫 Filtered out unrelated product: {target_title[:50]}...")
-
-        return valid_products
-
     def _search_target_products_intelligently(self, amazon_product: Dict, base_search_term: str = "", max_results: int = 5) -> List[Dict]:
         """
         Search Target products using intelligent queries based on Amazon product data.
@@ -1575,72 +1395,25 @@ class ProductMatchingSystem:
         """
         print(f"🧠 Using intelligent Target search based on Amazon product data...")
 
-        # Get prioritized search queries
-        search_queries = self._create_intelligent_target_search_query(amazon_product, base_search_term)
-
-        if not search_queries:
-            print("❌ No valid search queries generated")
+        # Use the new Target scraper module's intelligent search
+        try:
+            products = self.target_scraper.intelligent_search(
+                amazon_product, 
+                base_search_term, 
+                max_results, 
+                save_results=False
+            )
+            
+            if products:
+                print(f"✅ Intelligent search found {len(products)} Target products")
+            else:
+                print("❌ No products found with intelligent search")
+                
+            return products
+            
+        except Exception as e:
+            print(f"❌ Error in intelligent Target search: {str(e)}")
             return []
-
-        all_products = []
-
-        # Try each search query in order of precision
-        for i, query in enumerate(search_queries, 1):
-            print(f"\n   📋 Trying search strategy {i}/{len(search_queries)}: '{query[:80]}...'")
-
-            try:
-                # Use existing Target search method
-                products = self._search_target_products(query, max_results)
-
-                if products:
-                    # For UPC search, validate that results are not just random data
-                    if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
-                        # Check if products are actually related to UPC search
-                        valid_products = self._validate_upc_search_results(products, query, amazon_product)
-                        if valid_products:
-                            print(f"   ✅ Found {len(valid_products)} valid UPC-matched products")
-                            all_products.extend(valid_products)
-                            print("   🎯 UPC search successful - using these results as high-confidence matches")
-                            break
-                        else:
-                            print(f"   🎯 UPC '{query}' search returned unrelated products - trying next strategy...")
-                            continue
-                    else:
-                        print(f"   ✅ Found {len(products)} products with this strategy")
-                        all_products.extend(products)
-
-                    # If we have enough products, we can stop
-                    if len(all_products) >= max_results:
-                        break
-                else:
-                    print(f"   ❌ No products found with strategy {i}")
-                    # For UPC search, try next strategy instead
-                    if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
-                        print(f"   🎯 UPC '{query}' not found on Target - trying next strategy...")
-
-            except Exception as e:
-                print(f"   ⚠️ Error with strategy {i}: {str(e)}")
-                # For UPC search, try next strategy instead
-                if i == 1 and len(query.strip()) >= 10 and query.strip().isdigit():
-                    print(f"   🎯 UPC search failed - trying next strategy...")
-                continue
-
-        # Remove duplicates while preserving order
-        unique_products = []
-        seen_tcins = set()
-
-        for product in all_products:
-            tcin = product.get('basic_info', {}).get('tcin') or product.get('tcin', '')
-            if tcin and tcin not in seen_tcins:
-                seen_tcins.add(tcin)
-                unique_products.append(product)
-
-        # Limit to max_results
-        final_products = unique_products[:max_results]
-
-        print(f"\n   📊 Final result: {len(final_products)} unique products found")
-
-        return final_products
 
     def run_complete_matching_workflow(self, search_term: str, max_results: int = 5) -> List[MatchingResult]:
         """
@@ -1893,7 +1666,7 @@ class ProductMatchingSystem:
             if detailed_product is None:
                 print(f"❌ Amazon extractor returned None for ASIN: {asin}")
                 return None
-                
+
             if not isinstance(detailed_product, dict):
                 print(f"❌ Amazon extractor returned invalid type: {type(detailed_product)}")
                 return None
@@ -2112,51 +1885,29 @@ class ProductMatchingSystem:
             return []
 
     def _search_target_products(self, search_term: str, max_results: int = 5) -> List[Dict]:
-        """Search Target for products - live search only, no fallbacks"""
+        """Search Target for products using the new Target scraper module"""
         try:
-            if not TARGET_SEARCH_AVAILABLE:
-                print("❌ Target search not available.")
-                return []
-
-            if not hasattr(self, 'target_searcher') or self.target_searcher is None:
-                print("❌ Target searcher not initialized.")
-                return []
-
             print(f"🔍 Searching Target for '{search_term}'...")
 
-            # Search Target with timeout handling
-            products = self.target_searcher.search_and_extract(search_term, max_results)
+            # Use the new Target scraper module
+            products = self.target_scraper.search_products(search_term, max_results, save_results=False)
 
             if not products:
                 print("   ❌ No products found in Target search.")
                 return []
 
             print(f"   ✅ Found {len(products)} Target products")
-
-            # Convert to dict format
-            product_dicts = []
-            for product in products:
-                product_dict = {
-                    'tcin': product.tcin,
-                    'title': product.title,
-                    'price': product.price,
-                    'original_price': product.original_price,
-                    'brand': product.brand,
-                    'product_url': product.product_url,
-                    'availability': product.availability
-                }
-                product_dicts.append(product_dict)
-
-            return product_dicts
+            return products
 
         except Exception as e:
             print(f"   ❌ Target search error: {str(e)}")
             return []
 
     def _fetch_target_product_details(self, product_url: str) -> Optional[Dict]:
-        """Fetch detailed Target product information"""
+        """Fetch detailed Target product information using the new Target scraper module"""
         try:
-            detailed_product = self.target_extractor.extract_product(product_url)
+            # Use the new Target scraper module for URL scraping
+            detailed_product = self.target_scraper.scrape_product_url(product_url, save_results=False)
             return detailed_product
         except Exception as e:
             print(f"❌ Error fetching Target product details: {str(e)}")
